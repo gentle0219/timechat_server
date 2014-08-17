@@ -1,0 +1,16 @@
+.row  
+  = simple_form_for([:admin, @user], :html=> {class: 'form-horizontal', multipart: true}) do |f|
+    = f.error_notification
+    .row
+      .span3
+        = f.input :avatar
+      .span6
+        = f.input :name, required: true
+        = f.input :email, required: true
+        = f.input :password, required: true
+        = f.input :password_confirmation, required: true        
+    .row
+      .span3.offset6
+        = f.button :submit, "Submit", class: 'btn btn-primary'
+        = link_to "Cancel", admin_users_path, class:'btn btn-default'
+

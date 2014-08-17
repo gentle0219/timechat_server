@@ -1,0 +1,27 @@
+.container
+  .row.first-row
+    .span8
+      %h3 Messages
+  .row.inbox-list
+    - @conversation.messages.each do |msg|
+      .span9.message-details{class: msg.sender == @sender ? "pull-left" : "pull-right"}
+        .row{style:'border-bottom: 1px solid blue;padding: 10px 10px 0;'}
+          .span4{style:'margin-left:0px;'}
+            %label{style:'font-weight: 600;'}
+              Sender:
+              = msg.sender == @sender ? "ME" : msg.sender.name
+        .row{style:'padding: 20px 10px;'}
+          .span8{style:'margin-left:0px;'}
+            %label= raw(msg.body)
+          .span2
+        .row{style:'border-top: 1px solid blue;padding: 5px 10px 10px;'}
+          .span4{style:'margin-left:0px;'}
+            Receiver:
+            = msg.receiver.name
+          .span4.pull-right
+            %label{style:"text-align:right;"}
+              Sent At:
+              = msg.created_at.strftime("%m/%d %Y %H:%M:%S")
+  .row.last-row
+    .span2
+      = link_to "Back", params[:user_id].present? ? admin_messages_path : inbox_admin_messages_path, class: 'btn btn-primary'

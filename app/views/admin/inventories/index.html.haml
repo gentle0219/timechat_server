@@ -1,0 +1,44 @@
+.row.first-row
+  .span7
+    %h3 Inventory Overview
+  .span3{style:'margin-top:20px;'}
+    = form_tag admin_inventories_path, method: 'get', :class=>'form-search', :id=>'inventory_search_form'
+    .input.input-prepend{style:'width:80%;'}
+      %button{type:'submit',class:'btn'} 
+        %i.icon-search{:onclick=>'javascript:$("#inventory_search_form").submit()',style:'margin-top:2px;'}
+      = text_field_tag 'search', params[:search], :class=>'span3 search-query', style:'padding-left:5px;padding-right:5px;width:100%;'
+      %span.fornav-end
+        %i.icon-remove-sign{:onclick=>'javascript:$("#inventory_search_form .search-query").val(""); $("#inventory_search_form").submit()', style:'margin-left: -20px;margin-top: -6px;position: relative;'}
+      
+  .span2{style:'margin-top:20px;'}
+    = link_to "New Inventory", new_admin_inventory_path, class: 'btn btn-primary pull-right', :"data-no-turbolink"=>true
+.row.customers-contents
+  %table.table.table-striped.table-hover.table-bordered
+    %thead
+      %tr
+        %th SKU
+        %th Name
+        %th Purchaased Cost
+        %th Selling Price
+        %th Quantity
+        %th Re-Order Point
+        %th Last Purchase Date
+        %th Manage
+    %tbody
+      - @inventories.each do |inventory|
+        %tr
+          %td= inventory.ivt_id
+          %td= inventory.name
+          %td= inventory.cost
+          %td= inventory.selling_price
+          %td= inventory.quantity
+          %td= inventory.re_order_point
+          %td= inventory.purchase_date.strftime("%m/%d/%Y")
+          %td
+            = link_to(edit_admin_inventory_path(inventory), class: 'btn btn-mini', :"data-no-turbolink"=>true) do
+              %i.icon-pencil
+
+            = link_to(admin_inventory_path(inventory), class: 'btn btn-mini', method: :delete, data: {confirm: "Are you sure"}) do
+              %i.icon-trash
+    %tfoot
+      

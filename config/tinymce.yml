@@ -1,0 +1,6 @@
+theme: "modern"
+toolbar1: bold italic | undo redo | fontselect | forecolor | code | 
+plugins:
+  - link
+  - textcolor
+  - code

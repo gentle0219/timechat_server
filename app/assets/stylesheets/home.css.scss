@@ -1,0 +1,109 @@
+// Place all the styles related to the home controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+// User Index page style
+.admin_users_index{	
+	.first-row{
+		.form-search{
+			margin-top: 15px;
+			.icon-search{
+				position: absolute; 
+				margin-top: 8px; 
+				margin-left: 7px;
+				cursor: pointer;
+			}
+			.icon-remove-sign{
+				position: absolute; 				
+				margin-left: -21px; 
+				margin-top: 8px;
+			}
+
+			.search-query{
+				padding-left: 22px;
+				padding-right: 22px;
+				width: 86%;
+			}
+		}
+	}
+}
+
+
+.form-title{
+	text-align: center;
+}
+
+.signin_page{
+	border: 2px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+}
+
+
+form .controls input[type="text"]{
+	width: 90%
+}
+
+form .controls input[type="tel"]{
+	width: 90%
+}
+
+form .controls input[type="email"]{
+	width: 90%
+}
+
+form .controls input[type="password"]{
+	width: 90%
+}
+
+form .controls select{
+	width: 98%
+}
+
+.general{
+	
+}
+.owner-info{
+	
+}
+
+fieldset.group-border {
+	border-radius: 10px;
+  border: 1px groove #ddd !important;
+  padding: 0 1.4em 1.4em 1.4em !important;
+  margin: 0 0 1.5em 0 !important;
+  -webkit-box-shadow:  0px 0px 0px 0px #000;
+          box-shadow:  0px 0px 0px 0px #000;
+}
+
+legend.group-border {
+  width:auto;
+  padding:0 10px; /* To give a bit of padding on the left and right */  
+  margin-bottom: 0;
+  border: none;
+  background-color: white;
+}
+
+
+.inbox-list{
+  .row{
+    margin-left: 0px;
+  }
+  .message-details{
+    background-color: #eee;
+    border: 2px solid #ddd;    
+    margin-bottom: 10px;
+  }  
+  .inbox-row-bold{
+    .span2{
+      font-weight: 600;
+    }
+    .span7{
+      font-weight: 600;
+    }
+    .span2{
+      font-weight: 600;
+    }
+  }
+}
+

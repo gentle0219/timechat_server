@@ -1,0 +1,13 @@
+.row.assign-cleaners
+  .row
+    .span4.pull-right
+      = link_to "Clear All", "#", class: 'btn btn-default'
+      = link_to "Save", "#", class: 'btn btn-primary'
+  .row
+    - @properties.each do |property|
+      .span6
+        .row
+          .span2
+            = property.name
+          .span4
+            = select_tag :cleaners, options_for_select(current_user.members.map{|m| [m.email, m.id.to_s]}, include_blank: true), name: "cleaners[#{property.id.to_s}]"

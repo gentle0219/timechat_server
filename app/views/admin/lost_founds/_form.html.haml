@@ -1,0 +1,23 @@
+.row.workorder-form-page
+  = simple_form_for([:admin, @lost_found], :html=> {class: 'form-horizontal', multipart: true}) do |f|
+    = f.error_notification
+    .general
+      .form-inputs
+        %fieldset.group-border
+          %legend.group-border Report Lost Item
+          .row
+            .span8
+              = f.input :property, :collection => current_user.properties.collect{|prt| [prt.name, prt.id]}, selected: f.object.property_id, required: true
+          .row
+            .span8
+              = f.input :item_name, required: true
+          .row
+            .span8
+              = f.input :description, as: :text, required: false, input_html:{style:"width:550px;"}
+            .span4
+      .form-actions
+        .row
+          .span2.offset3
+            = link_to "Cancel", admin_lost_founds_path, class: 'btn btn-danger span1'
+          .span2
+            = f.submit "Save", class: 'btn btn-primary span2'

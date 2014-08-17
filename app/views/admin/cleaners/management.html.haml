@@ -1,0 +1,59 @@
+.row.time-clocks-list
+  .row
+    %h1.form-title Management
+  .row
+    %fieldset.group-border.repots-group
+      %legend.group-border Reports
+      %br/
+      .row
+        .span5.offset1
+          .row
+            .span2
+              %label Inspection List by Date
+            .span2
+              = text_field_tag :inspection_list_date, nil, :"data-behaviour"=>'datepicker', class: 'span2'
+            .span1
+              = link_to "GO", "#", class: 'btn btn-success'
+          .row
+            .span2
+              %label Cleaner List by Date
+            .span2
+              = text_field_tag :cleaner_list_by_date, nil, :"data-behaviour"=>'datepicker', class: 'span2'
+            .span1
+              = link_to "GO", "#", class: 'btn btn-success'
+          .row
+            .span2
+              %label Work Orders by Date
+            .span2
+              = text_field_tag :work_orders_by_date, nil, :"data-behaviour"=>'datepicker', class: 'span2'
+            .span1
+              = link_to "GO", "#", class: 'btn btn-success'
+          .row
+            .span2
+              %label Cleaner by Date
+            .span2
+              = text_field_tag :cleaner_by_date, nil, :"data-behaviour"=>'datepicker', class: 'span2'
+            .span1
+              = link_to "GO", "#", class: 'btn btn-success'
+        .span5
+          .row
+            .span2
+              %label Lost & Found by Date
+            .span2
+              = text_field_tag :lost_found_by_date, nil, :"data-behaviour"=>'datepicker', class: 'span2'
+            .span1
+              = link_to "GO", "#", class: 'btn btn-success'
+          .row
+            .span2
+              %label Cleaner Detail
+            .span2
+              = select_tag :cleaner_detail, options_for_select(current_user.members.all.map{|m| [m.email, m.id]}), prompt: "Slect Cleaner", class: 'span2'
+            .span1
+              = link_to "GO", "#", class: 'btn btn-success'
+          .row
+            .span2
+              %label Unit Detail
+            .span2
+              = select_tag :unit_detail, options_for_select(current_user.properties.all.map{|p| [p.name, p.id]}), prompt: "Slect Property", class: 'span2'
+            .span1
+              = link_to "GO", "#", class: 'btn btn-success'

@@ -1,0 +1,24 @@
+= TimeChat APIs
+
+== API
+
+=== Accounts endpoint
+
+==== Check sigined user
+  POST: /api/v1/accounts/check_token
+  parameters:
+    token           String *required
+
+==== Signup
+  POST: /api/login/register
+
+
+==== Signin
+  POST: /api/v1/accounts/sign_in
+  PARAMS:
+    email:            String *required
+    password:         String *required
+    dev_id:           String *required
+
+
+

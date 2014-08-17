@@ -1,0 +1,53 @@
+.new-message-page
+  .row.header-row{style:'border-bottom: 1px solid #000000; margin-bottom:20px;'}
+    .span8{style:'margin-left: 0px;'}
+      %h3{style:'margin-bottom: 0px;'} New Message    
+
+  .row.workorder-form-page
+    = simple_form_for([:admin, @message], :html=> {class: 'form-horizontal', multipart: true}) do |f|
+      = f.error_notification
+      .general
+        .form-inputs
+          %fieldset.group-border
+            %legend.group-border Send Message
+            .row{style:'margin-left: 0px;'}
+              .span2{style:"margin-left: 0px;"}
+                - if current_user.is_admin?
+                  %label.radio
+                    %input#optionsRadios1.msg_option{checked: "checked", name: "msg_option", type: "radio", value: "0"}/
+                    Signle Property
+                  %label.radio
+                    %input#optionsRadios2.msg_option{name: "msg_option", type: "radio", value: "1"}/
+                    All Properties
+
+                %label.radio
+                  %input#optionsRadios3.msg_option{name: "msg_option", type: "radio", value: "2"}/
+                  All Cleaners
+                %label.radio
+                  %input#optionsRadios3.msg_option{name: "msg_option", type: "radio", value: "3"}/
+                  All Inspectors
+
+              .span6.property_select_box{style:"display: none;"}
+                = select_tag :property, options_for_select(@properties.map{|prt| [prt.name, prt.id]}), required: true
+            %br/
+            %br/
+            .row{style:'margin-left: 0px;'}
+              .span2{style:"margin-left: 0px;"}
+                %label Message
+              .span10{style:'margin-left: 0px;'}
+                = text_area_tag :body, nil, class: "span12 tinymce", style: "max-width: 900px;"
+        .form-actions
+          .row
+            .span2.offset3
+              = link_to "Cancel", inbox_admin_messages_path, class: 'btn btn-danger span1'
+            .span2
+              = f.submit "Save", class: 'btn btn-primary span2'
+
+:javascript
+  $(".msg_option").click(function(){
+    if($(this).val()==0){
+      $(".property_select_box").show()
+    }else{
+      $(".property_select_box").hide()
+    }
+  })

@@ -1,0 +1,29 @@
+.row.first-row
+  .span7
+    %h3 Members
+  .row.member-list
+  %table.table.table-striped.table-hover.table-bordered
+    %thead
+      %tr
+        %th Name
+        %th Email
+        %th Role
+        %th Sent Messages
+        %th Received Messages
+        %th Unread Messages
+        %th Conversations
+    %tbody
+      - @members.each do |member|
+        %tr
+          %td= member.name
+          %td= member.email
+          %td= member.role.capitalize
+          %td= member.sent_messages.count
+          %td= member.received_messages.count
+          %td= member.unread_messages.count
+          %td
+            = link_to(admin_message_path(member), class: 'btn btn-mini', :"data-no-turbolink"=>true) do
+              %i.icon-book
+            
+    %tfoot
+      

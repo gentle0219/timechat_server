@@ -1,0 +1,160 @@
+.row  
+  = simple_form_for([:admin, @property], :html=> {class: 'form-horizontal', multipart: true}) do |f|
+    = f.error_notification
+    .form-inputs
+      .general
+        %fieldset.group-border
+          %legend.group-border General
+          %br/
+          .row
+            .span4
+              = f.input :name, required: true
+              = f.input :address1, required: true
+            .span4
+              = f.input :pt_id, required: true, label: "Property ID"
+              = f.input :address2, required: false
+            .span3
+              = f.input :device_id, required: false, label: "Device ID"
+          .row
+            .span4
+              = f.input :city, required: false
+            .span4
+              = f.input :state, collection: us_states, include_blank:false
+            .span3
+              = f.input :zip_code, required: false
+          
+          .row
+            .span4
+              = f.input :phone
+            .span4.location-list
+              .control-group.string.optional.location
+                %label.string.optional.control-label{for: "location"} Location
+                .controls
+                  = text_field :locations, nil, name: "locations[]", style: "width: 70%"
+                  = link_to("+", 'javascript://', :"data-target" => "#confirm_modal", :"data-toggle" => "modal", class: 'btn btn-mini')
+              - if f.object.property_locations.present?
+                - f.object.property_locations.each do |loc|
+                  .control-group.string.optional.location
+                    .controls
+                      = text_field_tag :locations, loc.location, name: "locations[]", style: "width: 70%"
+                      = link_to("x", "javascript://", class: 'btn btn-mini btn-delete-location')
+
+                
+              
+              / .control-group
+              /   .controls
+              /     = hidden_field_tag :location, "asdfasdf", name: "location[]"
+              /     = label_tag :location, "asdfasd", style: "width:80%; float:left;"
+              /     = link_to("x", "javascript://$(this).parent().parent().remove();", class: 'btn btn-mini btn-delete-location')
+
+                    
+
+          .row
+            .span4
+              = f.input :bedrooms, collection:[*1..12].map{|cc|["Bedrooms - " + cc.to_s, cc]}, include_blank: false
+            .span4
+              = f.input :full_bathrooms, collection:[*1..12].map{|cc|["Full Bathrooms - " + cc.to_s, cc]}, include_blank: false
+            .span3
+              = f.input :half_bathrooms, collection:[*1..12].map{|cc|["Half Bathrooms - " + cc.to_s, cc]}, include_blank: false, input_html:{style:'width: 160px;'}
+      .owner-info
+        %fieldset.group-border
+          %legend.group-border Owner Info
+          %br/
+          .row
+            .span4
+              .control-group.string.required.owner_name
+                %label.string.required.control-label{for: "owner_name"}
+                  %abbr{title: "required"} *
+                  Name
+                .controls
+                  %input#owner_name.string.required{name: "owner[name]", type: "text", value: @owner.present? ? @owner.name : ''}/
+              .control-group.string.required.owner_address1
+                %label.string.required.control-label{for: "owner_address1"}
+                  %abbr{title: "required"} *
+                  Address1
+                .controls
+                  %input#owner_address1.string.required{name: "owner[address1]", type: "text", value: @owner.present? ? @owner.address1 : ''}/
+            .span4.offset1
+              .control-group.string.required.owner_pt_id
+                %label.string.required.control-label{for: "owner_pt_id"}
+                  %abbr{title: "required"} *
+                  Property ID
+                .controls
+                  %input#owner_pt_id.string.required{name: "owner[pt_id]", type: "text", value: @owner.present? ? @owner.pt_id : ''}/
+              .control-group.string.optional.owner_address2
+                %label.string.optional.control-label{for: "owner_address2"} Address2
+                .controls
+                  %input#owner_address2.string.optional{name: "owner[address2]", type: "text", value: @owner.present? ? @owner.address2 : ''}/
+          .row
+            .span4
+              .control-group.string.optional.owner_city
+                %label.string.optional.control-label{for: "owner_city"} City
+                .controls
+                  %input#owner_city.string.optional{name: "owner[city]", type: "text", value: @owner.present? ? @owner.city : ''}/
+            .span4
+              .control-group.select.optional.state
+                %label.select.optional.control-label{for: "state"} State
+                .controls
+                  = select_tag :state, options_for_select(us_states, selected: @owner.present? ? @owner.state : ''), include_blank:false, name: 'owner[state]'
+            .span3
+              .control-group.string.optional.owner_zip
+                %label.string.optional.control-label{for: "owner_zip"} Zip
+                .controls
+                  %input#owner_zip.string.optional{name: "owner[zip]", type: "text", value: @owner.present? ? @owner.zip_code : ''}/
+          .row
+            .span4
+              .control-group.tel.optional.owner_phone
+                %label.tel.optional.control-label{for: "owner_phone"} Telephone 1
+                .controls
+                  %input#owner_phone.string.tel.optional{name: "owner[phone]", type: "tel", value: @owner.present? ? @owner.phone : ''}/
+            .span4.offset1
+              .control-group.string.optional.owner_phone2
+                %label.string.optional.control-label{for: "owner_phone2"} Telephone 2
+                .controls
+                  %input#owner_phone2.string.optional{name: "owner[phone2]", type: "text", value: @owner.present? ? @owner.phone2 : ''}/
+
+      .note-info
+        %fieldset.group-border
+          %legend.group-border Notes
+          %br/
+          .row
+            =f.input :notes, as: :text, label: false, input_html:{cols:80, rows:5, class: 'span10'}
+    .form-actions
+      = f.button :submit, "Submit", class: 'btn btn-primary offset2'
+      = link_to "Cancel", admin_properties_path, class: 'btn btn-default offset1'
+
+   
+
+
+
+#confirm_modal.modal.fade
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} &times;
+        %h4.modal-title Add Location
+      .modal-body.form-horizontal
+        .control-group.string.optional.property_address2
+          %label.string.optional.control-label{for: "new_location"} New Location
+          .controls            
+            = text_field_tag :new_location
+      .modal-footer
+        %button{type:"button", class:"btn btn-default", :"data-dismiss" =>"modal"} Cancel
+        = link_to "Add Location", "#", "data-dismiss" => "modal", class: "btn btn-primary", onclick:"add_loation();"        
+    / /.modal-content
+  / /.modal-dialog
+/ /.modal
+
+
+:javascript
+  function add_loation(){
+    new_loc = $("#new_location").val()
+    new_item = '<div class="control-group"><div class="controls"><input type="hidden" value="'+new_loc+'" name="locations[]" id="location"><label style="width:80%; float:left;" for="location">'+new_loc+'</label><a href="javascript://" class="btn btn-mini btn-delete-location">x</a></div></div>'
+
+    $(".location-list").append(new_item);
+  }
+
+  $(".location-list").on("click", ".btn-delete-location", function(){
+    $(this).parent().parent().remove();
+  })
+  

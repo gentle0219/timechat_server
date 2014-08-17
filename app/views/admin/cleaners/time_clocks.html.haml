@@ -1,0 +1,27 @@
+.row.time-clocks-list
+  .row
+    %h1.form-title Time Clock
+  .row
+    %table.table.table-striped.table-hover.table-bordered
+      %thead
+        %tr
+          %th Property ID            
+          %th Property Name            
+          %th Cleaner / Inspector
+          %th Status            
+          %th Phone
+          %th Last Login
+      %tbody
+        - @properties.each do |property|
+          %tr
+            %td= property.pt_id
+            %td= property.name
+            %td= property.cleaner_inspector_name
+            %td= property.assign_status
+            %td= property.phone
+            %td= property.assigned_last_sign_in_at
+
+      %tfoot
+        %tr
+          %td.digg_pagination{colspan:6}
+            = will_paginate @properties, previous_label: '< PREV', next_label: 'NEXT >' if @properties.present?

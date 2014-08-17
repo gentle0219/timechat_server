@@ -1,0 +1,45 @@
+.row.assign-cleaners
+  .row
+    .span4.pull-right
+      = link_to "Clear All", "#", class: 'btn btn-default'
+      = link_to "Save", "javascript:$('#update_cleaners').submit()", class: 'btn btn-primary'
+  .row
+    = form_for :cleaner, url: admin_update_cleaners_path, html: {class: 'form-horizontal', id: 'update_cleaners'} do |f|
+      .row
+        .span1
+          %label{style:"margin-top: 5px;text-align: right;"} Property
+        .span3{style:'margin-left: 5px;'}
+          = select_tag :property, options_for_select(Property.all.map{|prt| [prt.name, prt.id]}), name: "cleaners[property]"
+        .span1
+          %label{style:'margin-top: 5px;text-align: right;'} Cleaner
+        .span3{style:'margin-left: 5px;'}
+          = select_tag :cleaner, options_for_select(User.cleaners.map{|m| [m.email, m.id.to_s]}), name: "cleaners[cleaner]"
+      / - @properties.each do |property|
+      /   .span6
+      /     .row
+      /       .span2
+      /         = property.name
+      /       .span4
+      /         - assign = Assign.where(property_id:property.id).first
+      /         = select_tag :cleaners, options_for_select(current_user.cleaners.map{|m| [m.email, m.id.to_s]}, selected: assign.present? ? assign.member_id.to_s : ''), name: "cleaners[#{property.id.to_s}]"
+  .row
+    %table.table.table-hover.table-condensed.table-bordered.table-striped
+      %thead
+        %tr
+          %th Property
+          %th Cleaner
+          %th Date
+          %th Status
+          %th Manager
+      %tbody
+        - @properties.each do |property|
+          - property.assigns.each do |assign|
+            %tr
+              %td= property.name
+              %td= assign.member.name
+              %td= assign.created_at.strftime("%m/%d/%Y")
+              %td= assign.status
+              %td
+                = link_to(admin_delete_cleaner_path(assign), class: 'btn btn-mini', method: :delete, data: {confirm: "Are you sure"}) do
+                  %i.icon-trash
+              

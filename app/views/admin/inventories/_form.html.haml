@@ -1,0 +1,81 @@
+.row  
+  = simple_form_for([:admin, @inventory], :html=> {class: 'form-horizontal', multipart: true, :"data-validate" => "parsley"}) do |f|
+    = f.error_notification
+    .form-inputs
+      .general
+        %fieldset.group-border
+          %legend.group-border General
+          %br/
+          .row
+            .span4
+              = f.input :ivt_id, required: true, label: "SKU", :"data-required"=>"true"
+              = f.input :name, required: true
+              = f.input :re_order_point, label: "Re-Order Point"
+            .span4.offset1              
+              = f.input :quantity
+              = f.input :purchase_date, input_html:{:"data-behaviour"=>'datepicker'}
+              = f.input :location
+      .pricing-options
+        %fieldset.group-border
+          %legend.group-border Pricing Options
+          %br/
+          .row
+            .span4
+              %br/
+              = text_field_tag :cost, f.object.cost.present? ? f.object.cost : '', name: "inventory[cost]"
+              %br/
+              %br/
+              = select_tag :price_type, options_for_select(Inventory::PRICING_TYPES), name: "inventory[price_type]"
+              %br/
+              %br/
+            .span4
+              .pricing-style-box{style:'background-color: #ff9900;'}
+                %br/
+                %br/
+                %br/
+            .span3
+              %label{style:'text-align:center;'} COST PER ITEM
+              %br/
+              %label#price_label{style:'font-size: 50px;text-align: center;'}
+
+      .note-info
+        %fieldset.group-border
+          %legend.group-border Notes
+          %br/
+          .row
+            =f.input :notes, as: :text, label: false, input_html:{cols:80, rows:5, class: 'span10'}
+    .form-actions
+      = f.button :submit, "Submit", class: 'btn btn-primary offset2'
+      = link_to "Cancel", admin_inventories_path, class: 'btn btn-default offset1'
+
+
+:javascript
+  $("#cost").change(function(){
+    if($("#price_type").val()=="%"){
+      cost = (parseInt($("#cost").val()) / 100 *100) + 100
+      $("#price_label").text("$"+cost)
+    }else if($("#price_type").val()=="$"){
+      cost = (parseInt($("#cost").val()) + 15)
+      $("#price_label").text("$"+cost)
+    }else if($("#price_type").val()=="$$"){
+      cost = parseInt($("#cost").val())
+      $("#price_label").text("$"+cost)
+    }   
+
+  });
+
+  $("#price_type").change(function(){
+    if($(this).val()=="%"){
+      cost = (parseInt($("#cost").val()) / 100 *100) + 100
+      $("#price_label").text("$"+cost)
+      $(".pricing-style-box").css("background-color", "#ff9900")
+    }else if($(this).val()=="$"){
+      cost = (parseInt($("#cost").val()) + 15)
+      $("#price_label").text("$"+cost)
+      $(".pricing-style-box").css("background-color", "#2b78e4")
+    }else if($(this).val()=="$$"){
+      cost = parseInt($("#cost").val())
+      $("#price_label").text("$"+cost)
+      $(".pricing-style-box").css("background-color", "#351c75")
+    }
+  });
