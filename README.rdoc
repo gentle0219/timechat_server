@@ -63,25 +63,25 @@
 
 
 ==== Get Search Friend
-    GET: /api/v1/search_friend
+    GET: /api/v1/friends/search_friend
     parameters:
       token               String *required
       email               String *required
 
 ==== Add Friend
-    POST: /api/v1/add_friend
+    POST: /api/v1/friends/add_friend
     parameters:
       token               String *required
       email               String *required
 
 ==== Accept Friend
-    POST: /api/v1/accept_friend
+    POST: /api/v1/friends/accept_friend
     parameters:
       token               String *required
       friend_id           String *required
 
 ==== Decline Friend
-    POST: /api/v1/decline_friend
+    POST: /api/v1/friends/decline_friend
     parameters:
       token               String *required
       friend_id           String *required
