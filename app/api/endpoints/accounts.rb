@@ -6,9 +6,7 @@ module Endpoints
       # GET: /api/v1/accounts/forgot_password
       # parameters:
       #   email:      String *required
-        
-      # results: 
-      #   success string
+
       get :forgot_password do
         user = User.where(email:params[:email]).first
         if user.present?
@@ -24,21 +22,18 @@ module Endpoints
         
       end
 
-      # Forgot Password
+      # Change Password
       # POST: /api/v1/accounts/change_password
       # parameters:
-      #   auth_token:       String *required
+      #   token             String *required
       #   old_password      String *required
       #   new_password      String *required
-
-      # results: 
-      #   success json
 
       desc "Change Password"
       post :change_password do
         old_password = params[:old_password]
         new_password = params[:old_password]
-        user = User.find_by_auth_token(params[:auth_token])
+        user = User.find_by_auth_token(params[:token])
         if user.present?
           if user.valid_password?(new_password)
             user.password = new_password
@@ -56,13 +51,13 @@ module Endpoints
       # Change User name
       # POST: /api/v1/accounts/change_user_name
       # parameters:
-      #   auth_token        String *required
+      #   token             String *required
       #   user_name         String *required
 
       desc "Change user name"
       post :change_user_name do
         user_name = params[:username]
-        user = User.find_by_auth_token(params[:auth_token])
+        user = User.find_by_auth_token(params[:token])
         if user.present?
           if user.valid_password?(new_password)
             user.password = new_password
@@ -80,11 +75,11 @@ module Endpoints
       # Change email
       # POST: /api/v1/accounts/change_email
       # parameters:
-      #   auth_token        String *required
+      #   token             String *required
       #   new_email         String *required
       post :change_email do
         new_email = params[:new_email]
-        user = User.find_by_auth_token(params[:auth_token])
+        user = User.find_by_auth_token(params[:token])
         if user.present?
           if user.update_attributes(email:new_email)
             {data:[],message:{type:'success',value:'Changed the new email', code: 0}}
@@ -99,11 +94,11 @@ module Endpoints
       # Change avatar
       # POST: /api/v1/accounts/upload_avatar
       # parameters:
-      #   auth_token        String *required
+      #   token             String *required
       #   avatar            Image *required      
       post :upload_avatar do
         avatar = params[:avatar]
-        user = User.find_by_auth_token(params[:auth_token])
+        user = User.find_by_auth_token(params[:token])
         if user.present?
           if user.update_attributes(avatar:avatar)
             {data:[],message:{type:'success',value:'Changed the avatar', code: 0}}
@@ -115,25 +110,20 @@ module Endpoints
         end
       end
 
-
-      desc "Get Notifications"
-      get :notifications do
-      end
-    
       # Check sigined user
       # POST: /api/v1/accounts/check_token
       # parameters:
-      #   ahtu_token        String *required
-      
-      def :check_token do
-        user = User.find_by_auth_token(params[:auth_token])
+      #   token             String *required
+
+      post :check_token do
+        user = User.find_by_auth_token(params[:token])
         if user.present?
-          if (Time.now - user.last_sign_in_at) / 1.minute < 25
+          #if (Time.now - user.last_sign_in_at) / 1.minute < 25
             user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar.url}
-            render :json => {data:user_info,message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}
-          else
-            render :json => {data:[],message:{type:'error',value:'sigin again', code: TimeChatNet::Application::ERROR_LOGIN}}
-          end          
+            {data:user_info,message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}
+          #else
+          #  render :json => {data:[],message:{type:'error',value:'sigin again', code: TimeChatNet::Application::ERROR_LOGIN}}
+          #end          
         else
           {data:[],message:{type:'error',value:'Can not find this user', code: 0}}
         end

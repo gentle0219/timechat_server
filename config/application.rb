@@ -82,6 +82,9 @@ module TimeChatNet
    ERROR_MEDIA_TYPE_FILE = 601;
    SUCCESS_UPLOADED = 602;
    MEDIA_NOT_FOUND = 603;
+
+   # messages
+   DEBUG = "User unregistered system"
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.

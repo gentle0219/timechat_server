@@ -9,6 +9,7 @@ class Photo
   belongs_to :photoble, 		:polymorphic => true
   
   belongs_to :user
+  has_many :comments
 
   def photo_url
   	if self.photo.url.nil?

@@ -10,15 +10,79 @@
     token           String *required
 
 ==== Signup
-  POST: /api/login/register
-
+  POST: /api/v1/accounts/sign_up
+  parameters:
+    email               String *required
+    password            String *required
+    user_id             String *required
+    user_name           String *required
+    dev_id              String *required
+    social_type         String *required
+    remote_avatar_url   String *required
+    time_zone           String *required
+    
 
 ==== Signin
   POST: /api/v1/accounts/sign_in
   PARAMS:
-    email:            String *required
-    password:         String *required
-    dev_id:           String *required
+    email:              String *required
+    password:           String *required
+    dev_id:             String *required
+
+==== Change Password
+    POST: /api/v1/accounts/change_password
+    parameters:
+      token             String *required
+      old_password      String *required
+      new_password      String *required
+
+==== Change User name
+    POST: /api/v1/accounts/change_user_name
+    parameters:
+      token             String *required
+      user_name         String *required
+
+==== Change email
+    POST: /api/v1/accounts/change_email
+    parameters:
+      token             String *required
+      new_email         String *required
+
+==== Change avatar
+    POST: /api/v1/accounts/upload_avatar
+    parameters:
+      token             String *required
+      avatar            Image *required
 
 
+=== Friends endpoint
+==== Get Friend List
+    GET: /api/v1/friends
+    parameters:
+      token       String *required
+
+
+==== Get Search Friend
+    GET: /api/v1/search_friend
+    parameters:
+      token               String *required
+      email               String *required
+
+==== Add Friend
+    POST: /api/v1/add_friend
+    parameters:
+      token               String *required
+      email               String *required
+
+==== Accept Friend
+    POST: /api/v1/accept_friend
+    parameters:
+      token               String *required
+      friend_id           String *required
+
+==== Decline Friend
+    POST: /api/v1/decline_friend
+    parameters:
+      token               String *required
+      friend_id           String *required
 

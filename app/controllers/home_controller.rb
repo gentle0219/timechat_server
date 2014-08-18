@@ -11,7 +11,7 @@ class HomeController < ApplicationController
     email               = params[:email]
     password            = params[:password]
     user_id             = params[:user_id]
-    user_name           = params[:user_name]
+    user_name           = params[:username]
     dev_id              = params[:dev_id]    
     social_type         = params[:social_type]
     remote_avatar_url   = params[:avatar]
@@ -25,7 +25,7 @@ class HomeController < ApplicationController
       case social_type
       when User::SOCIAL_TYPES[0]    # if social type is email
         user = User.new
-        status = User.update_attributes(email:email,password:password,password_confirmation:password,name:user_name)      
+        status = User.update_attributes(email:email,password:password,password_confirmation:password,name:user_name, time_zone:time_zone)
       when User::SOCIAL_TYPES[1]    # if social type is facebook
         user = User.where(email:email).first
         if user.present?
@@ -95,15 +95,15 @@ class HomeController < ApplicationController
    end
 
    def delete_session
-    if params[:auth_token].present?
-      resource = User.find_by_auth_token(params[:auth_token])
+    if params[:token].present?
+      resource = User.find_by_auth_token(params[:token])
     end
     
     if resource.nil?
-      render :json => {data:user_info,message:{type:'error',value:'No Such User', code: TimeChatNet::Application::ERROR_LOGIN}}
+      render :json => {data:[],message:{type:'error',value:'No Such User', code: TimeChatNet::Application::ERROR_LOGIN}}
     else
       sign_out(resource)      
-      render :json => {data:user_info,message:{type:'success',value:'Success sign out', code: TimeChatNet::Application::SUCCESS_LOGOUT}}
+      render :json => {data:[],message:{type:'success',value:'Success sign out', code: TimeChatNet::Application::SUCCESS_LOGOUT}}
     end
   end
   
