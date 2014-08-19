@@ -12,6 +12,6 @@ class API < Grape::API
   mount Endpoints::Friends
   mount Endpoints::Notifications
   mount Endpoints::Comments
-  # mount Endpoints::Spots
+  mount Endpoints::Medias
   # mount Endpoints::LostFounds
 end

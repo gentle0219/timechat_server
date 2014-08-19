@@ -86,3 +86,23 @@
       token               String *required
       friend_id           String *required
 
+==== Ignore Friend
+    POST: /api/v1/friends/ignore_friend
+    parameters:
+      token               String *required
+      friend_id           String *required
+
+==== Remove Ignore Friend
+    POST: /api/v1/friends/remove_ignore_friend
+    parameters:
+      token               String *required
+      friend_id           String *required
+
+==== Remove Friend
+    POST: /api/v1/friends/remove_friend
+    parameters:
+      token               String *required
+      friend_id           String *required
+
+
+      

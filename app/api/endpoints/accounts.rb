@@ -129,8 +129,14 @@ module Endpoints
         end
       end
 
-    end
 
+      # Check sigined user
+      # POST: /api/v1/accounts/check_token
+      # parameters:
+      #   token             String *required
+      post :setting do
+      end
 
+    end # end accounts
   end
 end

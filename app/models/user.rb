@@ -8,7 +8,7 @@ class User
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable, :token_authenticatable
+         :recoverable, :rememberable, :trackable, :validatable #, :token_authenticatable
          
   ## Database authenticatable
   field :email,                     :type => String, :default => ""
@@ -56,7 +56,7 @@ class User
   
   field :friend_ids,                :type => String,    :default => ''
   field :invited_friend_ids,        :type => String,    :default => ''
-  field :delined_friend_ids,        :type => String,    :default => ''
+  field :ignored_friend_ids,        :type => String,    :default => ''
   # belongs_to :friend, :class_name => "User"
   # has_many :friends, :class_name => "User", :foreign_key=>"friend_id"
   
@@ -107,19 +107,20 @@ class User
 
   def send_accept_friend_notification(accepted_user)
     user                      = self
-    invited_f_ids             = invited_friend_ids.split
-    invited_f_ids             = invited_f_ids.delete(accepted_user.id.to_s)
-    user.invited_friend_ids   = invited_f_ids.split(",")
+    invited_f_ids             = invited_friend_ids.split(",")
+    
+    invited_f_ids.delete(accepted_user.id.to_s)
+    user.invited_friend_ids   = invited_f_ids.join(",")
     user.save
     user.notifications.create(message:'Accpted Friend', data:accepted_user.id.to_s, type:Notification::TYPE[2])
   end
 
   def send_decline_friend_notification(declined_user)
     user                      = self
-    f_ids                     = friend_ids.split
+    f_ids                     = friend_ids.split(",")
     f_ids.delete(declined_user.id.to_s)
 
-    invited_f_ids             = invited_friend_ids.split
+    invited_f_ids             = invited_friend_ids.split(",")
     invited_f_ids.delete(declined_user.id.to_s)
 
     user.friend_ids           = f_ids.uniq.join(",")
@@ -128,13 +129,41 @@ class User
     user.notifications.create(message:'Declined Friend', data:declined_user.id.to_s, type:Notification::TYPE[1])
   end
 
+  def send_ignore_friend_notification(ignored_user)
+    user                      = self
+    ignore_f_ids              = ignored_friend_ids.split(",") << friend.id.to_s
+    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")
+    user.save
+    user.notifications.create(message:'Ignored Friend', data:ignored_user.id.to_s, type:Notification::TYPE[2])
+  end
+
+  
+  def send_removed_friend_notification(removed_user)
+    user                      = self
+    f_ids                     = friend_ids.split(",")
+    f_ids.delete(friend.id.to_s)
+    user.friend_ids           = f_ids.uniq.join(",")   
+
+    ignore_f_ids              = ignored_friend_ids.split(",")
+    ignore_f_ids.delete(friend.id.to_s)
+    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")
+
+    user.save
+    user.notifications.create(message:'Removed Friend', data:removed_user.id.to_s, type:Notification::TYPE[2])
+  end
+
+
+  def is_friend(friend)
+    friend_ids.split(",").include? and !ignored_friend_ids.split(",").include? friend.id.to_s
+  end  
+
   def add_friend(friend)    
     user                      = self
-    f_ids                     = friend_ids.split << friend.id.to_s
-    invited_f_ids             = invited_friend_ids.split << friend.id.to_s
+    f_ids                     = friend_ids.split(",") << friend.id.to_s
+    invited_f_ids             = invited_friend_ids.split(",") << friend.id.to_s
 
     user.friend_ids           = f_ids.uniq.join(",")
-    user.invited_friend_ids   = invited_f_ids.split(",")
+    user.invited_friend_ids   = invited_f_ids.uniq.join(",")
 
     friend.send_invite_friend_notification(user)
     user.save    
@@ -142,14 +171,47 @@ class User
 
   def accept_friend(friend)
     user                      = self
-    f_ids                     = friend_ids.split << friend.id.to_s
-    
+    f_ids                     = friend_ids.split(",") << friend.id.to_s    
+    user.friend_ids           = f_ids.uniq.join(",")
+
     friend.send_accept_friend_notification(user)
     user.save
   end
 
   def decline_friend(friend)    
-    friend.send_decline_friend_notification(self)    
+    friend.send_decline_friend_notification(self)
+  end
+  
+  def ignore_friend(friend)
+    user                      = self
+    ignore_f_ids              = ignored_friend_ids.split(",") << friend.id.to_s
+    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")
+    user.save
+    friend.send_ignore_friend_notification(user)
+  end
+
+  def remove_ignore_friend(friend)
+    user                      = self
+    ignore_f_ids              = ignored_friend_ids.split(",")
+    ignore_f_ids.delete(friend.id.to_s)     
+    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")    
+    user.save
+    # notif = friend.notifications.unread_notifications.where(data:user.id.to_s,type:Notification::TYPE[2]).first
+    # notif.destroy if notif.present?
+  end
+
+  def remove_friend(friend)
+    user                      = self
+    f_ids                     = friend_ids.split(",")
+    f_ids.delete(friend.id.to_s)
+    user.friend_ids           = f_ids.uniq.join(",")   
+
+    ignore_f_ids              = ignored_friend_ids.split(",")
+    ignore_f_ids.delete(friend.id.to_s)
+    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")
+
+    user.save
+    friend.send_removed_friend_notification(user)
   end
 
   def self.find_by_auth_token token

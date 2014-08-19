@@ -25,7 +25,7 @@ class HomeController < ApplicationController
       case social_type
       when User::SOCIAL_TYPES[0]    # if social type is email
         user = User.new
-        status = User.update_attributes(email:email,password:password,password_confirmation:password,name:user_name, time_zone:time_zone)
+        status = user.update_attributes(email:email,password:password,password_confirmation:password,name:user_name, time_zone:time_zone)
       when User::SOCIAL_TYPES[1]    # if social type is facebook
         user = User.where(email:email).first
         if user.present?
@@ -60,7 +60,7 @@ class HomeController < ApplicationController
       end
 
       if status == false
-        render :json => {:failed => user.errors.messages}
+        render :json => {:error => user.errors.messages}
       else        
         user.devices.create_by_device_id(dev_id)
         user = sign_in( :user, user )
