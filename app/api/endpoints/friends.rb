@@ -14,7 +14,7 @@ module Endpoints
       get do
         user = User.find_by_auth_token(params[:token])
         if user.present?          
-          friend_info = user.friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend Accept', friend_status:301, time_zone:f.time_zone, username:f.name}}
+          friend_info = user.friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name}}
           {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[],message:{type:'error',value:'Can not find this user', code: 0}}
@@ -31,7 +31,7 @@ module Endpoints
         emails  = params[:email]
         if user.present?
           friends = user.friends.in(email:emails.split(","))
-          friend_info = friends.map{|f| {id:f.id.to_s, email:f.email, debug:TimeChatNet::Application::DEBUG}}
+          friend_info = user.friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Search Friends', friend_status:301, time_zone:f.time_zone, username:f.name, block:user.is_block(f)}}
           {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
@@ -48,10 +48,10 @@ module Endpoints
         user  = User.find_by_auth_token(params[:token])
         if user.present?          
           friend = User.where(email:email).first
-          if !user.is_friend(friend)
+          if !user.is_friend(friend) and user.id != friend.id
             if friend.present?
               user.add_friend(friend)
-              {data:{id:friend.id,username:friend.name,avatar:friend.avatar.url,email:friend.email,code: TimeChatNet::Application::USER_REGISTERED, debug: "User registred in system"}, message:{type:'success',value:'Added new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
+              {data:friend.friend_api_detail(user), message:{type:'success',value:'Added new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
             else
               {data:[], message:{type:'error',value:'Can not find this friend', code: TimeChatNet::Application::USER_UNREGISTERED}}  
             end
@@ -76,10 +76,9 @@ module Endpoints
         if user.present?
           friend = User.where(id:friend_id).first
           user.accept_friend(friend)
-          user.add_friend(friend)
           notification = Notification.where(id:notification_id).first
           notification.read!
-          {data:{id:friend.id,name:friend.name,avatar:friend.avatar.url}, message:{type:'success',value:'accept new friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
+          {data:friend.friend_api_detail(user), message:{type:'success',value:'accept new friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
@@ -100,7 +99,7 @@ module Endpoints
           user.decline_friend(friend)          
           notification = Notification.where(id:notification_id).first
           notification.read!
-          {data:{id:friend.id,name:friend.name,avatar:friend.avatar.url}, message:{type:'success',value:'decline friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          {data:friend.friend_api_detail(user), message:{type:'success',value:'decline friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
@@ -115,9 +114,10 @@ module Endpoints
         user            = User.find_by_auth_token(params[:token])
         friend_id       = params[:friend_id]        
         if user.present?
-          friend = User.where(id:friend_id).first          
-          user.ignore_friend(friend)          
-          {data:{id:friend.id,name:friend.name,avatar:friend.avatar.url}, message:{type:'success',value:'ignore friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
+          friend = User.find(friend_id)
+          user.ignore_friend(friend)
+          
+          {data:friend.friend_api_detail(user), message:{type:'success',value:'ignore friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
@@ -132,9 +132,9 @@ module Endpoints
         user            = User.find_by_auth_token(params[:token])
         friend_id       = params[:friend_id]        
         if user.present?
-          friend = User.where(id:friend_id).first          
+          friend = User.find(friend_id)
           user.remove_ignore_friend(friend)          
-          {data:{id:friend.id,name:friend.name,avatar:friend.avatar.url}, message:{type:'success',value:'remove ignore friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
+          {data:friend.friend_api_detail(user), message:{type:'success',value:'remove ignore friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
@@ -149,9 +149,9 @@ module Endpoints
         user            = User.find_by_auth_token(params[:token])
         friend_id       = params[:friend_id]        
         if user.present?
-          friend = User.where(id:friend_id).first
+          friend = User.find(friend_id)
           user.remove_friend(friend)          
-          {data:{id:friend.id,name:friend.name,avatar:friend.avatar.url}, message:{type:'success',value:'remove friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
+          {data:friend.friend_api_detail(user), message:{type:'success',value:'remove friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end

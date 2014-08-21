@@ -4,6 +4,7 @@ class HomeController < ApplicationController
   skip_before_filter :verify_authenticity_token
 
   def index
+    @user = current_user if current_user.present?
   end
 
 
@@ -26,6 +27,7 @@ class HomeController < ApplicationController
       when User::SOCIAL_TYPES[0]    # if social type is email
         user = User.new
         status = user.update_attributes(email:email,password:password,password_confirmation:password,name:user_name, time_zone:time_zone)
+        UserMailer.welcome(user).deliver
       when User::SOCIAL_TYPES[1]    # if social type is facebook
         user = User.where(email:email).first
         if user.present?
@@ -62,11 +64,11 @@ class HomeController < ApplicationController
       if status == false
         render :json => {:error => user.errors.messages}
       else        
-        user.devices.create_by_device_id(dev_id)
+        Device.create_by_device_id(dev_id, user)
         user = sign_in( :user, user )
-        user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar.url}
+        user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar_url}
 
-        render :json => {data:user_info,message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}
+        render :json => {data:user_info,message:{type:'success',value:'Signed up successfully', code: TimeChatNet::Application::SUCCESS_LOGIN}}
       end
     end     
   end
@@ -82,10 +84,9 @@ class HomeController < ApplicationController
       render :json => {failed:'No Such User'}, :status => 401
     else      
       if resource.valid_password?( password )
-        resource.devices.create_by_device_id(dev_id)
-         
-        user = sign_in(:user, resource)        
-        user_info={id:resource.id.to_s, username:resource.name,email:resource.email,token:resource.authentication_token,avatar:user.avatar.url}
+        Device.create_by_device_id(dev_id,resource)
+        user = sign_in(:user, resource)
+        user_info={id:resource.id.to_s, username:resource.name,email:resource.email,token:resource.authentication_token,avatar:resource.avatar_url}
         
         render :json => {data:user_info,message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}
       else
@@ -107,5 +108,10 @@ class HomeController < ApplicationController
     end
   end
   
+  def destroy
+    user = User.find(params[:id])
+    user.destroy
+    redirect_to action: :index
+  end  
 
 end

@@ -54,7 +54,13 @@
       token             String *required
       avatar            Image *required
 
-
+==== Push setup
+    POST: /api/v1/accounts/push_setting
+    parameters:
+      token             String *required
+      push_enable       String 
+      sound_enable      String
+      
 === Friends endpoint
 ==== Get Friend List
     GET: /api/v1/friends
@@ -110,6 +116,10 @@
 ==== Delete notification
     POST: /api/v1/notifications/delete
     parameters:
-      token               String *required      
+      token               String *required
       notification_id     String *required
-      
+==== Had Read notifications
+    POST: /api/v1/notifications/had_read_notification
+    parameters:  
+      token               String *required
+      notification_id     String *required

@@ -1,0 +1,41 @@
+!!!
+%html
+  %head
+    %meta{content: "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
+    .header    
+    .content
+      %h3
+        Dear
+        = @user.name.capitalize
+      %p
+        You have been ignored by
+        = @friend.name.capitalize
+        %br/
+        Please check your friend
+      %p
+        Thank you,
+        %br/
+        TimeChat team
+
+    .footer
+
+:css
+  p, h3{
+    color: red;
+  }
+  h3{
+    margin: 0px;
+  }
+  .header{
+    background: url("http://192.168.0.55:3000/assets/email_template_header.png");
+    height: 98px;
+  }
+  .footer{
+    background: url("http://192.168.0.55:3000/assets/email_template_mark.png") no-repeat;
+    height: 50px;
+  }
+
+:javascript
+  var elem = document.getElementById("message_headers");
+  elem.remove();    

@@ -1,0 +1,44 @@
+!!!
+%html
+  %head
+    %meta{content: "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
+    .header    
+    .content
+      %h2= "Hi #{@user.name}!"
+      %h2
+        THANKS FOR REGISTERING FOR AN ACCOUNT AT TIMECHAT.
+        %sup TM
+      %hr{style:"background-color: #8bc4E0;height: 2px;border: none;"}
+      %p
+        If you didn't make this request, you could cancel the account by clicking the link below and it will peermantely be removed off our system.
+      %p
+        %h3 PLEASE ONLY CLICK IF YOU WANT TO REMOVE THIS ACCOUNT
+        %h3 (ACTION CANNOT BE UNDONE!)
+      
+      %p
+        = link_to "Destroy your email", "http://192.168.0.55:3000/users/destroy/#{@user.id}", method: :delete, data: {confirm: "Are you sure"}
+
+      %p
+        Other members cannot see your e-mail address. We do not spam and this may be the last e-mail you receive from us. You will however, receive a notification e-mail
+    .footer
+
+:css
+  p, h3{
+    color: red;
+  }
+  h3{
+    margin: 0px;
+  }
+  .header{
+    background: url("http://192.168.0.55:3000/assets/email_template_header.png");
+    height: 98px;
+  }
+  .footer{
+    background: url("http://192.168.0.55:3000/assets/email_template_mark.png") no-repeat;
+    height: 50px;
+  }
+
+:javascript
+  var elem = document.getElementById("message_headers");
+  elem.remove();

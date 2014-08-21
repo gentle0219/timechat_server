@@ -93,5 +93,5 @@ TimeChatNet::Application.configure do
       :authentication => :plan,
       :enable_starttls_auto => true}
 
-  config.action_mailer.default_url_options = {:host => 'timechattnet.herokuapp.com'}  
+  config.action_mailer.default_url_options = {:host => 'timechatnet.herokuapp.com'}
 end

@@ -12,12 +12,12 @@ class Device
 
   validates_uniqueness_of :dev_id, :scope => :user_id
 
-  def self.create_by_device_id(dev_id, type = 'ios')
-    device = self.where(dev_id:dev_id).first
+  def self.create_by_device_id(dev_id, user)
+    device = user.devices.where(dev_id:dev_id).first
     if device.present?
       device
     else
-      Device.create(dev_id:dev_id, platform:type)
+      user.devices.create(dev_id:dev_id, platform:'ios')
     end
   end
 end

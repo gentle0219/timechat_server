@@ -21,6 +21,32 @@ module Endpoints
         end
       end
 
+      # Delete notification
+      # POST: /api/v1/notifications/delete
+      # parameters:
+      #   token               String *required
+      #   notification_id     String *required
+      post :delete do
+        user            = User.find_by_auth_token(params[:token])
+        notification_id = params[:notification_id]
+        if user.present?
+          notification  = Notification.find(notification_id)
+          notification.destroy
+          {data:[], message:{type:'success',value:'deleted notification', code: 0}}
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
+        end
+      end
+      
+      # Delete notification
+      # POST: /api/v1/notifications/delete
+      # parameters:
+      #   token               String *required
+      #   notification_id     String *required
+      post :had_read_notification do
+        
+      end
+
     end #notifications
   end
 end

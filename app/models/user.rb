@@ -51,6 +51,9 @@ class User
 
   field :time_zone,                 :type => String
 
+  field :push_enable,               :type => Boolean,   default: true
+  field :sound_enable,              :type => Boolean,   default: true
+
   field :authentication_token,      :type => String  
   before_save :ensure_authentication_token
   
@@ -63,6 +66,8 @@ class User
   has_many :devices,                dependent: :destroy
   has_many :notifications,          dependent: :destroy
   
+  has_many :medias,                 dependent: :destroy
+  has_many :comments,               dependent: :destroy
 
   validates_presence_of :role
   
@@ -102,17 +107,17 @@ class User
   end
 
   def send_invite_friend_notification(friend)
-    self.notifications.create(message:'Invited New Friend', data:friend.id.to_s, type:Notification::TYPE[0])
+    self.notifications.create(message:"#{friend.name} wants to add you in his friends", data:friend.id.to_s, type:Notification::TYPE[0], status:TimeChatNet::Application::NOTIFICATION_INVITE_IN_FRIEND)
   end
 
   def send_accept_friend_notification(accepted_user)
     user                      = self
     invited_f_ids             = invited_friend_ids.split(",")
-    
     invited_f_ids.delete(accepted_user.id.to_s)
     user.invited_friend_ids   = invited_f_ids.join(",")
     user.save
-    user.notifications.create(message:'Accpted Friend', data:accepted_user.id.to_s, type:Notification::TYPE[2])
+
+    user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
   end
 
   def send_decline_friend_notification(declined_user)
@@ -124,38 +129,47 @@ class User
     invited_f_ids.delete(declined_user.id.to_s)
 
     user.friend_ids           = f_ids.uniq.join(",")
-    user.invited_friend_ids   = invited_friend_ids.uniq.join(",")
+    user.invited_friend_ids   = invited_f_ids.uniq.join(",")
     user.save
-    user.notifications.create(message:'Declined Friend', data:declined_user.id.to_s, type:Notification::TYPE[1])
+
+    user.notifications.create(message:"#{declined_user.name} declined your invitiation to friends", data:declined_user.id.to_s, type:Notification::TYPE[1], status:TimeChatNet::Application::NOTIFICATION_DECLINE_FRIEND)
   end
 
   def send_ignore_friend_notification(ignored_user)
-    user                      = self
-    ignore_f_ids              = ignored_friend_ids.split(",") << friend.id.to_s
-    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")
-    user.save
-    user.notifications.create(message:'Ignored Friend', data:ignored_user.id.to_s, type:Notification::TYPE[2])
+    self.notifications.create(message:"#{ignored_user.name} Ignored Friend", data:ignored_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::FRIEND_IGNORE)
   end
 
+  def send_remove_ignore_friend_notification(ignored_user)
+    self.notifications.create(message:"#{ignored_user.name} has deleted you from friends", data:ignored_user.id.to_s, type:Notification::TYPE[3], status:TimeChatNet::Application::FRIEND_DISABLE_FRIEND)
+  end
   
   def send_removed_friend_notification(removed_user)
     user                      = self
     f_ids                     = friend_ids.split(",")
-    f_ids.delete(friend.id.to_s)
+    f_ids.delete(removed_user.id.to_s)
     user.friend_ids           = f_ids.uniq.join(",")   
 
-    ignore_f_ids              = ignored_friend_ids.split(",")
-    ignore_f_ids.delete(friend.id.to_s)
-    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")
-
+    ignore_f_ids              = removed_user.ignored_friend_ids.split(",")
+    ignore_f_ids.delete(user.id.to_s)
+    removed_user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")
+    
     user.save
-    user.notifications.create(message:'Removed Friend', data:removed_user.id.to_s, type:Notification::TYPE[2])
+    removed_user.save
+    user.notifications.create(message:"#{removed_user.name} Removed Friend", data:removed_user.id.to_s, type:Notification::TYPE[4], status:TimeChatNet::Application::NOTIFICATION_REMOVED_FRIEND)
   end
 
 
   def is_friend(friend)
-    friend_ids.split(",").include? and !ignored_friend_ids.split(",").include? friend.id.to_s
+    friend_ids.split(",").include?(friend.id.to_s) and !invited_friend_ids.split(",").include?(friend.id.to_s) and !ignored_friend_ids.split(",").include?(friend.id.to_s)
   end  
+
+  def is_block(friend)
+    if ignored_friend_ids.split(",").include? friend.id.to_s
+      TimeChatNet::Application::FRIEND_IGNORE
+    else
+      TimeChatNet::Application::FRIEND_DISABLE_FRIEND
+    end
+  end
 
   def add_friend(friend)    
     user                      = self
@@ -194,10 +208,9 @@ class User
     user                      = self
     ignore_f_ids              = ignored_friend_ids.split(",")
     ignore_f_ids.delete(friend.id.to_s)     
-    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")    
+    user.ignored_friend_ids   = ignore_f_ids.uniq.join(",")
     user.save
-    # notif = friend.notifications.unread_notifications.where(data:user.id.to_s,type:Notification::TYPE[2]).first
-    # notif.destroy if notif.present?
+    friend.send_remove_ignore_friend_notification(user)
   end
 
   def remove_friend(friend)
@@ -214,9 +227,22 @@ class User
     friend.send_removed_friend_notification(user)
   end
 
+  def friend_api_detail(user)
+    friend = self
+    {id:friend.id.to_s,username:friend.name,avatar:friend.avatar.url,email:friend.email,code: TimeChatNet::Application::USER_REGISTERED, debug: "User registred in system", friend_status:user.is_block(friend), time_zone:friend.time_zone}
+  end
+
+  def avatar_url
+    if avatar.present?
+      avatar.url
+    else
+      ""
+    end
+  end
+
   def self.find_by_auth_token token
     User.where(authentication_token: token).first
-  end
+  end  
 
   private
   def generate_authentication_token

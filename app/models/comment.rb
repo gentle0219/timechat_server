@@ -2,7 +2,8 @@ class Comment
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  field :comment, type: :string
+  field :message, type: :string
+  
+  belongs_to :media
   belongs_to :user
-
 end
