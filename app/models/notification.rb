@@ -2,11 +2,12 @@ class Notification
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  TYPE = %w[invite decline accept ignore remove]
+  TYPE = %w[invite decline accept ignore remove share comment photo_like video_like]
   
   field :message,           type: String
   
   field :data,              type: String
+  field :media_id           type: String
   field :type,              type: String
   field :status,            type: Integer, default: 0
 
@@ -18,8 +19,25 @@ class Notification
 
   after_create :send_mail
 
-  def api_detail  
-    if Notification::TYPE.include? type
+  def api_detail
+    if self.type == Notification::TYPE[5]
+      friend = User.where(id:data).first
+      info = {
+              id:id.to_s,
+              date: created_at.strftime("%Y-%m-%d %H:%M:%S"),
+              additional:1,
+              debug: message,
+              friend_time: friend.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+              from: friend.name,
+              fromEmail: friend.email,
+              status: is_read,
+              status_info: "Sent notification",
+              type: status,
+              user_id: friend.id.to_s,
+              user_time: user.time,
+              media_id:media_id
+            }
+    else    
       friend = User.where(id:data).first
       info = {
               id:id.to_s,
@@ -35,7 +53,7 @@ class Notification
               user_id: friend.id.to_s,
               user_time: user.created_at
             }
-    end    
+    end
   end
 
   def read!

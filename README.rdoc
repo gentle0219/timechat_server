@@ -67,6 +67,21 @@
     parameters:
       token       String *required
 
+==== Get Facebook Users
+    GET: /api/v1/friends/facebook_users
+    parameters:
+      token       String *required
+
+==== Get Google Users
+    GET: /api/v1/friends/google_users
+    parameters:
+      token       String *required
+
+==== Get Phonebook Users
+    GET: /api/v1/friends/phonebook_users
+    parameters:
+      token       String *required
+      emails      String *required 
 
 ==== Get Search Friend
     GET: /api/v1/friends/search_friend
@@ -79,6 +94,12 @@
     parameters:
       token               String *required
       email               String *required
+
+==== Add Friends
+    POST: /api/v1/friends/add_friends
+    parameters:
+      token               String *required
+      user_ids            String *required
 
 ==== Accept Friend
     POST: /api/v1/friends/accept_friend
@@ -123,3 +144,73 @@
     parameters:  
       token               String *required
       notification_id     String *required
+
+
+=== Medias Endpoints
+==== Get all media
+    GET: /api/v1/medias
+    parameters:
+      token               String *required
+
+==== Get media for period
+    GET: /api/v1/medias/media_for_period
+    parameters:
+      token               String *required
+      hour                String *required
+
+==== Get all shared media
+    GET: /api/v1/medias/shared_media
+    parameters:
+      token               String *required
+
+==== Get media info by media id
+    GET: /api/v1/medias/media_info
+    parameters:
+      token               String *required
+      media_id            String *required
+
+==== Upload new media
+    POST: /api/v1/medias/upload
+    parameters:
+      token               String *required
+      media               Image Data
+      media_type          String *required [photo, video]
+    EX:
+    curl -F "token=gtr-YzGepAiTJv8yCed1" -F "media=@/Volumes/Work/Images/avatar.png" /api/v1/medias/upload
+
+==== Update media
+    POST: /api/v1/medias/update
+    parameters:
+      token               String *required
+      media_id            String *required
+      media               Image Data
+
+==== Share media
+    POST: /api/v1/medias/share
+    parameters:
+      token               String *required
+      media_id            String *required
+      friend_id           String *required
+
+==== Share medias
+    POST: /api/v1/medias/share_medias
+    parameters:
+      token               String *required
+      type                Integer
+      media_id            String *required
+      friend_ids          String *required
+
+
+=== Comments Endpoints
+==== Get comments by media id
+    GET: /api/v1/comments
+    parameters:
+      token       String *required
+      media_id    String *required
+
+==== Add comment
+    POST: /api/v1/comments/add_comment
+    parameters:
+      token       String *required
+      media_id    String *required
+      comment     String *required

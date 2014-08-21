@@ -7,19 +7,69 @@ module Endpoints
         {success: TimeChatNet::Application::USER_UNREGISTERED}
       end
 
+
+
       # Get Friend List
       # GET: /api/v1/friends
       # parameters:
       #   token       String *required
       get do
         user = User.find_by_auth_token(params[:token])
-        if user.present?          
-          friend_info = user.friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name}}
+        if user.present?
+          friends = user.friends.reject{|f| !user.is_friend(f)}
+          friend_info = friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name}}
           {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[],message:{type:'error',value:'Can not find this user', code: 0}}
         end
       end
+
+      # Get Facebook Users
+      # GET: /api/v1/friends/facebook_users
+      # parameters:
+      #   token       String *required
+      get :facebook_users do
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          fb_users = User.where(social_type: User::SOCIAL_TYPES[1]).reject{|u| user.is_friend(u)}
+          info = fb_users.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', username:f.name, avatar:f.avatar_url}}
+          {data:info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code: 0}}
+        end
+      end
+
+      # Get Google Users
+      # GET: /api/v1/friends/google_users
+      # parameters:
+      #   token       String *required
+      get :google_users do
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          gg_users = User.where(social_type: User::SOCIAL_TYPES[3]).reject{|u| user.is_friend(u)}
+          info = gg_users.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', username:f.name, avatar:f.avatar_url}}
+          {data:info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code: 0}}
+        end
+      end
+
+      # Get Phonebook Users
+      # GET: /api/v1/friends/phonebook_users
+      # parameters:
+      #   token       String *required
+      #   emails      String *required
+      get :phonebook_users do
+        user = User.find_by_auth_token(params[:token])
+        emails = params[:emails].split(",")
+        if user.present?
+          pb_users = User.in(email:emails).reject{|u| user.is_friend(u)}
+          info = pb_users.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', username:f.name, avatar:f.avatar_url}}
+          {data:info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code: 0}}
+        end
+      end      
 
       # Get Search Friends
       # GET: /api/v1/friends/search_friends
@@ -30,8 +80,8 @@ module Endpoints
         user    = User.find_by_auth_token(params[:token])
         emails  = params[:email]
         if user.present?
-          friends = user.friends.in(email:emails.split(","))
-          friend_info = user.friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Search Friends', friend_status:301, time_zone:f.time_zone, username:f.name, block:user.is_block(f)}}
+          friends     = user.friends.in(email:emails.split(",")).reject{|f| !user.is_friend(f)}
+          friend_info = friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name}}
           {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
@@ -46,7 +96,7 @@ module Endpoints
       post :add_friend do
         email = params[:email]
         user  = User.find_by_auth_token(params[:token])
-        if user.present?          
+        if user.present?
           friend = User.where(email:email).first
           if !user.is_friend(friend) and user.id != friend.id
             if friend.present?
@@ -58,6 +108,36 @@ module Endpoints
           else
             {data:[], message:{type:'error',value:'Already invited friend', code: TimeChatNet::Application::USER_UNREGISTERED}}
           end
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::USER_UNREGISTERED}}
+        end
+      end
+
+      # Add Friends
+      # POST: /api/v1/friends/add_friends
+      # parameters:
+      #   token               String *required
+      #   user_ids            String *required
+      post :add_friends do
+        user_ids  = params[:user_ids].split(",")
+        user      = User.find_by_auth_token(params[:token])
+        p params[:user_ids]
+        if user.present?
+          friends = User.in(id:user_ids)
+          if friends.count > 0
+            friends.each do |friend|
+              if !user.is_friend(friend) and user.id != friend.id
+                user.add_friend(friend)
+              end
+            end
+            if friends.count > 1
+              {data:[], message:{type:'success',value:'Added new friends', code: TimeChatNet::Application::SUCCESS_QUERY}}
+            else
+              {data:[], message:{type:'success',value:'Added new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
+            end
+          else
+            {data:[], message:{type:'error',value:'Can not find friends', code: TimeChatNet::Application::USER_UNREGISTERED}}
+          end          
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::USER_UNREGISTERED}}
         end

@@ -77,7 +77,8 @@ class HomeController < ApplicationController
     email           = params[:email]
     password        = params[:password]
     dev_id          = params[:dev_id]
-    
+    timezone        = params[:timezone]
+
     resource = User.find_for_database_authentication( :email => email )
     
     if resource.nil?
@@ -86,6 +87,7 @@ class HomeController < ApplicationController
       if resource.valid_password?( password )
         Device.create_by_device_id(dev_id,resource)
         user = sign_in(:user, resource)
+        resource.update_attributes(time_zone:timezone)
         user_info={id:resource.id.to_s, username:resource.name,email:resource.email,token:resource.authentication_token,avatar:resource.avatar_url}
         
         render :json => {data:user_info,message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}

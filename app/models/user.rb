@@ -49,7 +49,7 @@ class User
   field :social_type,               :type => String,    :default => User::SOCIAL_TYPES[0]
   field :social_id,                 :type => String,    :default => ''
 
-  field :time_zone,                 :type => String
+  field :time_zone,                 :type => String,    :default => '0'
 
   field :push_enable,               :type => Boolean,   default: true
   field :sound_enable,              :type => Boolean,   default: true
@@ -62,21 +62,37 @@ class User
   field :ignored_friend_ids,        :type => String,    :default => ''
   # belongs_to :friend, :class_name => "User"
   # has_many :friends, :class_name => "User", :foreign_key=>"friend_id"
+
+  # field :like_media_ids,                  :type => String,    :default =>''
   
   has_many :devices,                dependent: :destroy
   has_many :notifications,          dependent: :destroy
   
-  has_many :medias,                 dependent: :destroy
+  has_many :medias, class_name: 'Medium',                 dependent: :destroy
   has_many :comments,               dependent: :destroy
-
+  has_many :likes
+  
   validates_presence_of :role
   
   def unread_notifications
     notifications.unread_notifications
   end
   def friends
-    User.in(id:friend_ids.split(","))
+    friends = User.in(id:friend_ids.split(","))    
   end
+
+  # def add_like_media(media)
+  #   user = self
+  #   lm_ids = like_medias.split(",")
+  #   lm_ids << media.id.to_s
+  #   user.update_attributes(like_media_ids:lm_ids.uniq.join(","))
+  #   friend = like.user
+  #   friend.send_notification_like_your_photo(user, media.media_type) unless user == friend
+  # end
+
+  # def like_medias
+  #   Medium.in(id:like_media_ids.split(","))
+  # end
 
   def device_id
     devices.first.dev_id if devices.present?
@@ -136,11 +152,11 @@ class User
   end
 
   def send_ignore_friend_notification(ignored_user)
-    self.notifications.create(message:"#{ignored_user.name} Ignored Friend", data:ignored_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::FRIEND_IGNORE)
+    #self.notifications.create(message:"#{ignored_user.name} Ignored Friend", data:ignored_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::FRIEND_IGNORE)
   end
 
   def send_remove_ignore_friend_notification(ignored_user)
-    self.notifications.create(message:"#{ignored_user.name} has deleted you from friends", data:ignored_user.id.to_s, type:Notification::TYPE[3], status:TimeChatNet::Application::FRIEND_DISABLE_FRIEND)
+    #self.notifications.create(message:"#{ignored_user.name} has deleted you from friends", data:ignored_user.id.to_s, type:Notification::TYPE[3], status:TimeChatNet::Application::FRIEND_DISABLE_FRIEND)
   end
   
   def send_removed_friend_notification(removed_user)
@@ -158,9 +174,30 @@ class User
     user.notifications.create(message:"#{removed_user.name} Removed Friend", data:removed_user.id.to_s, type:Notification::TYPE[4], status:TimeChatNet::Application::NOTIFICATION_REMOVED_FRIEND)
   end
 
+  def send_photo_shared_friend_notification(share_user, media)
+    user = self
+    user.notifications.create(message:"#{share_user.name} shared new photo", data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_PHOTO)
+  end
+
+  def send_video_shared_friend_notification(share_user, media)
+    user = self
+    user.notifications.create(message:"#{share_user.name} shared new video", data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_VIDEO)
+  end
+  
+  def send_notification_add_new_comment(comment_user)
+    user = self
+    user.notifications.create(message:"New Comment", data:comment_user.id.to_s, type:Notification::TYPE[6], status:TimeChatNet::Application::NOTIFICATION_NEW_COMMENT)
+  end
+
+  def send_notification_like_your_photo(liked_user, type)
+    user = self    
+    status = type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_VIDEO
+    user.notifications.create(message:"Added new like", data:liked_user.id.to_s, type:Notification::TYPE[7], status:status)
+  end
 
   def is_friend(friend)
-    friend_ids.split(",").include?(friend.id.to_s) and !invited_friend_ids.split(",").include?(friend.id.to_s) and !ignored_friend_ids.split(",").include?(friend.id.to_s)
+    return true if friend.id == self.id
+    friend_ids.split(",").include?(friend.id.to_s) and !invited_friend_ids.split(",").include?(friend.id.to_s) # and !ignored_friend_ids.split(",").include?(friend.id.to_s)
   end  
 
   def is_block(friend)
@@ -171,6 +208,11 @@ class User
     end
   end
 
+  def time
+    server_time_zone_offset = Time.now.gmt_offset
+    offset = server_time_zone_offset / 60 / 60
+    Time.now + (time_zone.to_i-offset).hours
+  end
   def add_friend(friend)    
     user                      = self
     f_ids                     = friend_ids.split(",") << friend.id.to_s
