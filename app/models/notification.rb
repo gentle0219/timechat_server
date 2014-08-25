@@ -7,7 +7,7 @@ class Notification
   field :message,           type: String
   
   field :data,              type: String
-  field :media_id           type: String
+  field :media_id,          type: String
   field :type,              type: String
   field :status,            type: Integer, default: 0
 
@@ -22,10 +22,11 @@ class Notification
   def api_detail
     if self.type == Notification::TYPE[5]
       friend = User.where(id:data).first
+      media = Medium.where(id:media_id).first
       info = {
               id:id.to_s,
               date: created_at.strftime("%Y-%m-%d %H:%M:%S"),
-              additional:1,
+              additional:media.present? && media.media_type == "0" ? "2" : "1",
               debug: message,
               friend_time: friend.created_at.strftime("%Y-%m-%d %H:%M:%S"),
               from: friend.name,
@@ -42,7 +43,7 @@ class Notification
       info = {
               id:id.to_s,
               date: created_at.strftime("%Y-%m-%d %H:%M:%S"),
-              additional:1,
+              additional:"3",
               debug: message,
               friend_time: friend.created_at,
               from: friend.name,

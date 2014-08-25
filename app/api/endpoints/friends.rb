@@ -13,12 +13,20 @@ module Endpoints
       # GET: /api/v1/friends
       # parameters:
       #   token       String *required
+      #   friend_id   String 
       get do
-        user = User.find_by_auth_token(params[:token])
+        user      = User.find_by_auth_token(params[:token])
+        friend_id = params[:friend_id]
         if user.present?
-          friends = user.friends.reject{|f| !user.is_friend(f)}
-          friend_info = friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name}}
-          {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          friend = User.where(id:friend_id).first
+          if friend.present?
+            friend_info = {id:friend.id.to_s, email:friend.email, avatar:friend.avatar_url, friend_status:user.is_block(friend), time_zone:friend.time_zone, username:friend.name}
+            {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            friends = user.friends.reject{|f| !user.is_friend(f)}
+            friend_info = friends.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name}}
+            {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          end
         else
           {data:[],message:{type:'error',value:'Can not find this user', code: 0}}
         end

@@ -42,10 +42,11 @@ module Endpoints
       #   token               String *required
       #   media_id            String *required
       get :media_info do
-        user = User.find_by_auth_token(params[:token])
+        user      = User.find_by_auth_token(params[:token])
+        media_id  = params[:media_id]
         if user.present?
           media = Medium.find(media_id)
-          info = {id:media.id.to_s, media:media.media_url, created_at:media.created_at.strftime("%Y-%m-%d %H:%M:%S")}
+          info = {id:media.id.to_s, media:media.media_url, created_at:media.created_at.strftime("%Y-%m-%d %H:%M:%S"),type:media.media_type,thumb:media.thumb_url}
           {data:info,message:{type:'success',value:'get all medias', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}
@@ -124,7 +125,7 @@ module Endpoints
       #   media_id            String *required
       #   friend_id           String *required
       post :share do
-        user        = User.find_by_auth_token(params[:token])        
+        user        = User.find_by_auth_token(params[:token])
         media_id    = params[:media_id]
         friend      = User.find(params[:friend_id])
         if user.present?

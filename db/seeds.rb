@@ -26,3 +26,16 @@ root.create_child('Internet',2)
 root.create_child('Phone',3)
 root.create_child('Light Bulb',1)
 p ">>>>>>>>>  end creating categories"
+
+p "clear all friens relation"
+User.all.each do |u|
+  u.update_attributes(friend_ids:'', invited_friend_ids:'', ignored_friend_ids:'')
+end
+
+p "clear share medias"
+
+Medium.all.each do |m|
+  m.update_attributes(shared_ids:'')
+end
+
+Notification.destroy_all
