@@ -3,7 +3,7 @@
   %head
     %meta{content: "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    .header{style:'height:98px;background: url("http://192.168.0.55:3000/assets/email_template_header.png");'}
+    .header{style:'height:98px;background: url("http://timechatnet.herokuapp.com/assets/email_template_header.png");'}
     .content
       %h2= "Hi #{@user.name}!"
       %h2
@@ -17,11 +17,11 @@
         %h2{style:"color:red;margin:0px;"} (ACTION CANNOT BE UNDONE!)
       
       %p
-        = link_to "Destroy your email", "http://192.168.0.55:3000/users/destroy/#{@user.id}", method: :delete, data: {confirm: "Are you sure"}
+        = link_to "Destroy your email", "http://timechatnet.herokuapp.com/users/destroy/#{@user.id}", method: :delete, data: {confirm: "Are you sure"}
 
       %p
         Other members cannot see your e-mail address. We do not spam and this may be the last e-mail you receive from us. You will however, receive a notification e-mail
-    .footer{style:'background: url("http://192.168.0.55:3000/assets/email_template_mark.png") no-repeat;height: 50px;'}
+    .footer{style:'background: url("http://timechatnet.herokuapp.com/assets/email_template_mark.png") no-repeat;height: 50px;'}
   
 :javascript
   var elem = document.getElementById("message_headers");
