@@ -152,7 +152,11 @@ module Endpoints
         user          = User.find_by_auth_token(params[:token])        
         if user.present?
           friends     = User.in(id:params[:friend_ids].split(","))
+          p friends.count
+
           media       = Medium.find(params[:media_id])
+          p media.id.to_s
+          
           if media.present?
             media.share_friends(friends)
             {data:{id:media.id.to_s,media:media.media_url},message:{type:'success',value:'Shared Media', code:TimeChatNet::Application::SUCCESS_UPLOADED}}

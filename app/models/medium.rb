@@ -38,9 +38,10 @@ class Medium
     media = self
     friends.each do |f|
       ids = shared_ids.split(",")
-      unless ids.include?(f.id.to_s)
-        ids << f.id.to_s
-        media.update_attribute(:shared_ids,ids.uniq.join(","))
+      ids << f.id.to_s
+      media.update_attribute(:shared_ids,ids.uniq.join(","))
+      notif = f.notifications.where(media_id:media.id.to_s)
+      unless notif.count > 0
         if media.media_type == '1'
           f.send_photo_shared_friend_notification(user, media)
         else

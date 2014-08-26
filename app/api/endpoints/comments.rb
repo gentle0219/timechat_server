@@ -44,7 +44,7 @@ module Endpoints
           media = Medium.find(media_id)
           if media.present?
             comment = media.comments.create(comment:comment,user:user)
-            media.user.send_notification_add_new_comment(user)
+            # media.user.send_notification_add_new_comment(user)
             {data:{id:comment.id, comment:comment.comment, user_id:user.id.to_s},message:{type:'success',value:'Added new Comment', code:TimeChatNet::Application::SUCCESS_QUERY}}
           else
             {data:[],message:{type:'error',value:'Can not find media', code:TimeChatNet::Application::MEDIA_NOT_FOUND}}
