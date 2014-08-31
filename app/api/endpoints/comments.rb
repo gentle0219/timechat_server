@@ -43,7 +43,9 @@ module Endpoints
         if user.present?
           media = Medium.find(media_id)
           if media.present?
+            owner = media.user
             comment = media.comments.create(comment:comment,user:user)
+            owner.send_push_notification("You have received an comment from #{user.name}")
             # media.user.send_notification_add_new_comment(user)
             {data:{id:comment.id, comment:comment.comment, user_id:user.id.to_s},message:{type:'success',value:'Added new Comment', code:TimeChatNet::Application::SUCCESS_QUERY}}
           else

@@ -51,15 +51,24 @@ class User
 
   field :time_zone,                 :type => String,    :default => '0'
 
+  field :friend_ids,                :type => String,    :default => ''
+  field :invited_friend_ids,        :type => String,    :default => ''
+  field :ignored_friend_ids,        :type => String,    :default => ''
+
+  # setting options
+  field :auto_accept_friend,        :type => Boolean,   :default => false
+  field :auto_notify_friend,        :type => Boolean,   :default => false
+
   field :push_enable,               :type => Boolean,   default: true
   field :sound_enable,              :type => Boolean,   default: true
+
 
   field :authentication_token,      :type => String  
   before_save :ensure_authentication_token
   
-  field :friend_ids,                :type => String,    :default => ''
-  field :invited_friend_ids,        :type => String,    :default => ''
-  field :ignored_friend_ids,        :type => String,    :default => ''
+
+
+
   # belongs_to :friend, :class_name => "User"
   # has_many :friends, :class_name => "User", :foreign_key=>"friend_id"
 
@@ -72,6 +81,9 @@ class User
   has_many :comments,               dependent: :destroy
   has_many :likes
   
+
+
+
   validates_presence_of :role
   
   def unread_notifications
@@ -171,7 +183,7 @@ class User
     
     user.save
     removed_user.save
-    user.notifications.create(message:"#{removed_user.name} Removed Friend", data:removed_user.id.to_s, type:Notification::TYPE[4], status:TimeChatNet::Application::NOTIFICATION_REMOVED_FRIEND)
+    user.notifications.create(message:"#{removed_user.name} removed you from friends", data:removed_user.id.to_s, type:Notification::TYPE[4], status:TimeChatNet::Application::NOTIFICATION_REMOVED_FRIEND)
   end
 
   def send_photo_shared_friend_notification(share_user, media)
@@ -186,13 +198,18 @@ class User
   
   def send_notification_add_new_comment(comment_user)
     user = self
-    user.notifications.create(message:"New Comment", data:comment_user.id.to_s, type:Notification::TYPE[6], status:TimeChatNet::Application::NOTIFICATION_NEW_COMMENT)
+    user.notifications.create(message:"You have received an comment from #{comment_user.name}", data:comment_user.id.to_s, type:Notification::TYPE[6], status:TimeChatNet::Application::NOTIFICATION_NEW_COMMENT)
   end
 
   def send_notification_like_your_photo(liked_user, type)
     user = self    
     status = type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_VIDEO
     user.notifications.create(message:"Added new like", data:liked_user.id.to_s, type:Notification::TYPE[7], status:status)
+  end
+
+  def send_added_new_user_notification(new_user)
+    user = self
+    user.notifications.create(message:"#{new_user.name} has joined into TimeChat", data:new_user.id.to_s, type:Notification::TYPE[9], status:TimeChatNet::Application::NOTIFICATION_REGISTERED_FRIEND)
   end
 
   def is_friend(friend)
@@ -220,8 +237,11 @@ class User
 
     user.friend_ids           = f_ids.uniq.join(",")
     user.invited_friend_ids   = invited_f_ids.uniq.join(",")
-
-    friend.send_invite_friend_notification(user)
+    if friend.auto_accept_friend
+      friend.accept_friend(user)
+    else      
+      friend.send_invite_friend_notification(user)
+    end
     user.save    
   end
 
@@ -282,9 +302,33 @@ class User
     end
   end
 
+  def send_push_notification message
+    return false if self.devices.count < 0
+    devices = self.devices
+    devices.each do |device|
+      if Rails.env.production?
+        if device.platform == Device::DEVICE_PLATFORM[0]    # in case platform is ios
+          APNS.send_notification(device.dev_id,alert:message, badge:device.badge_count+1, sound: 'default')
+        else
+          destination = [device.dev_id]
+          data = {:alert=>notification.message}
+          GCM.send_notification(destination,data)
+        end
+      end
+    end
+  end
+
   def self.find_by_auth_token token
     User.where(authentication_token: token).first
-  end  
+  end
+
+  def send_notification_to_all_users
+    users = User.where(auto_notify_friend:true)
+    users.each do |user|
+      user.send_added_new_user_notification(self)
+    end
+  end
+
 
   private
   def generate_authentication_token

@@ -60,7 +60,22 @@
       token             String *required
       push_enable       String 
       sound_enable      String
-      
+==== Get Push Setting
+    GET: /api/v1/accounts/push_setting
+    parameters:
+      token             String *required
+==== Privacy setup
+    POST: /api/v1/accounts/privacy_setting
+    parameters:
+      token                 String *required
+      auto_accept_friend    Boolean 
+      auto_notify_friend    Boolean
+
+==== Get Privacy Setting
+    GET: /api/v1/accounts/privacy_setting
+    parameters:
+      token             String *required
+
 === Friends endpoint
 ==== Get Friend List
     GET: /api/v1/friends

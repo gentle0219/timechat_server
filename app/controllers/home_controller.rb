@@ -27,6 +27,7 @@ class HomeController < ApplicationController
       when User::SOCIAL_TYPES[0]    # if social type is email
         user = User.new
         status = user.update_attributes(email:email,password:password,password_confirmation:password,name:user_name, time_zone:time_zone)
+        user.send_notification_to_all_users
         UserMailer.welcome(user).deliver
       when User::SOCIAL_TYPES[1]    # if social type is facebook
         user = User.where(email:email).first
@@ -36,27 +37,30 @@ class HomeController < ApplicationController
           password = (0...8).map{(65+rand(26)).chr}.join
           user = User.new
           status = user.update_attributes(email:email,password:password,password_confirmation:password,social_type:social_type,social_id:user_id, name:user_name, time_zone:time_zone, remote_avatar_url:remote_avatar_url)
+          user.send_notification_to_all_users          
         end      
 
       when User::SOCIAL_TYPES[2]    # if social type is twitter
         email = user_id + "@timechat.com"
         user = User.where(email:email).first
         if user.present?
-          status = user.update_attributes(social_id:user_id, name:user_name)
+          status = user.update_attributes(social_id:user_id, name:user_name)          
         else
           user = User.new
           password = (0...8).map{(65+rand(26)).chr}.join
           status = user.update_attributes(email:email,password:password,password_confirmation:password,social_type:social_type,social_id:user_id, name:user_name)
+          user.send_notification_to_all_users
         end
 
       when User::SOCIAL_TYPES[3]    # if social type is google        
         user = User.where(email:email).first
         if user.present?
-          status = user.update_attributes(social_id:user_id, name:user_name)
+          status = user.update_attributes(social_id:user_id, name:user_name)          
         else
           user = User.new
           password = (0...8).map{(65+rand(26)).chr}.join
           status = user.update_attributes(email:email,password:password,password_confirmation:password,social_type:social_type,social_id:user_id, name:user_name)
+          user.send_notification_to_all_users
         end
         
       end

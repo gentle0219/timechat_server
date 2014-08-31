@@ -121,6 +121,31 @@ module Endpoints
         end
       end
 
+      # Add Friend
+      # POST: /api/v1/friends/add_friend_by_username
+      # parameters:
+      #   token               String *required
+      #   username               String *required
+      post :add_friend_by_username do
+        username  = params[:username]
+        user      = User.find_by_auth_token(params[:token])
+        if user.present?
+          friend = User.where(name:username).first
+          if !user.is_friend(friend) and user.id != friend.id
+            if friend.present?
+              user.add_friend(friend)
+              {data:friend.friend_api_detail(user), message:{type:'success',value:'Added new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
+            else
+              {data:[], message:{type:'error',value:'Can not find this friend', code: TimeChatNet::Application::USER_UNREGISTERED}}  
+            end
+          else
+            {data:[], message:{type:'error',value:'Already invited friend', code: TimeChatNet::Application::USER_UNREGISTERED}}
+          end
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::USER_UNREGISTERED}}
+        end
+      end
+
       # Add Friends
       # POST: /api/v1/friends/add_friends
       # parameters:

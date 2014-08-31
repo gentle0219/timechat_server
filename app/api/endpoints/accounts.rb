@@ -10,16 +10,24 @@ module Endpoints
       get :forgot_password do
         user = User.where(email:params[:email]).first
         if user.present?
-          UserMailer.forgot_password(user).deliver
-          {success: 'Email was sent successfully'}
+          UserMailer.forgot_password(user).deliver          
+          {data:[],message:{type:'success',value:'Email was sent successfully', code: TimeChatNet::Application::ERROR_LOGIN}}
         else
           {:failed => 'Cannot find your email'}
         end
       end
 
-      desc "Get last cleaner from property"
-      post :send_invite do
-        
+      # Get Push Setting
+      # GET: /api/v1/accounts/setting
+      # parameters:
+      #   token             String *required
+      get :setting do
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          {data:{push_enable:user.push_enable,sound_enable:user.sound_enable,auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend},message:{type:'success',value:'account setting', code: TimeChatNet::Application::SUCCESS_QUERY}}
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
+        end
       end
 
       # Change Password
@@ -148,7 +156,7 @@ module Endpoints
         end
       end
 
-      # Get Push Setup
+      # Get Push Setting
       # GET: /api/v1/accounts/push_setting
       # parameters:
       #   token             String *required
@@ -160,6 +168,41 @@ module Endpoints
           {data:[],message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
         end
       end
+
+      # Privacy setup
+      # POST: /api/v1/accounts/privacy_setting
+      # parameters:
+      #   token                 String *required
+      #   auto_accept_friend    Boolean 
+      #   auto_notify_friend    Boolean
+      post :privacy_setting do
+        auto_accept_friend = params[:auto_accept_friend] == '1' ? true : false
+        auto_notify_friend = params[:auto_notify_friend] == '1' ? true : false
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          if user.update_attributes(auto_accept_friend:auto_accept_friend, auto_notify_friend:auto_notify_friend)
+            {data:[], message:{type:'success',value:'Privacy setting', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[], message:{type:'error',value:'Can not privacy setting', code: TimeChatNet::Application::ERROR_QUERY}}  
+          end
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
+     
+      # Get Privacy Setting
+      # GET: /api/v1/accounts/privacy_setting
+      # parameters:
+      #   token             String *required
+      get :privacy_setting do
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          {data:{auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend},message:{type:'success',value:'Privacy setting', code: TimeChatNet::Application::SUCCESS_QUERY}}  
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
+
 
     end # end accounts
   end

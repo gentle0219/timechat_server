@@ -2,7 +2,7 @@ class Notification
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  TYPE = %w[invite decline accept ignore remove share comment photo_like video_like]
+  TYPE = %w[invite decline accept ignore remove share comment photo_like video_like added_new_user]
   
   field :message,           type: String
   
@@ -83,7 +83,8 @@ class Notification
     when Notification::TYPE[4]
       user = self.user
       friend = User.find(data)
-      UserMailer.remove_friend(user, friend).deliver
-    end      
+      UserMailer.remove_friend(user, friend).deliver    
+    end
   end
+
 end

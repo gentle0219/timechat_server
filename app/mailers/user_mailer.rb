@@ -7,6 +7,16 @@ class UserMailer < ActionMailer::Base
     mail(to: @user.email, subject: 'Welcome')
   end
 
+  def forgot_password(user)
+    @user = user
+    raw, enc = Devise.token_generator.generate(user.class, :reset_password_token)
+    user.reset_password_token   = enc
+    user.reset_password_sent_at = Time.now.utc
+    user.save(:validate => false)
+    @token = raw    
+    mail(to: @user.email, subject: 'Forgot Password')
+  end
+
   def invite_friend(user, friend)
     @user = user
     @friend = friend
