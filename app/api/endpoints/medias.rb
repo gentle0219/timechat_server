@@ -59,10 +59,32 @@ module Endpoints
       #   token               String *required
       #   hour                String *required
       get :media_for_period do
-        user = User.find_by_auth_token(params[:token])
-        hour = params[:hour].to_i - user.time_zone.to_i
+        user = User.find_by_auth_token(params[:token])        
+        
         if user.present?
-          medias  = user.medias.medias_by_time(hour)
+          if params[:hour].present?
+            hour = params[:hour].to_i - user.time_zone.to_i
+            medias  = user.medias.medias_by_time(hour)
+          else
+            medias  = user.medias
+          end          
+          info    = medias.map{|m| {id:m.id.to_s, filename:m.media_url, thumb:m.thumb_url, type:m.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:m.created_at.strftime("%Y-%m-%d %H:%M:%S")}}
+          {data:info,message:{type:'success',value:'get all medias', code:TimeChatNet::Application::SUCCESS_QUERY}}
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
+
+      # Get medias for friend
+      # GET: /api/v1/medias/medias_for_friend
+      # parameters:
+      #   token               String *required
+      #   friend_id           String *required
+      get :medias_for_friend do
+        user = User.find_by_auth_token(params[:token])        
+        friend = User.find(params[:friend_id])
+        if user.present?
+          medias  = friend.medias
           info    = medias.map{|m| {id:m.id.to_s, filename:m.media_url, thumb:m.thumb_url, type:m.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:m.created_at.strftime("%Y-%m-%d %H:%M:%S")}}
           {data:info,message:{type:'success',value:'get all medias', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else

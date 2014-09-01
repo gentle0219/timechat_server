@@ -144,8 +144,11 @@ class User
     invited_f_ids.delete(accepted_user.id.to_s)
     user.invited_friend_ids   = invited_f_ids.join(",")
     user.save
-
-    user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
+    if accepted_user.auto_accept_friend
+      user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends automatically", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
+    else
+      user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
+    end    
   end
 
   def send_decline_friend_notification(declined_user)
