@@ -70,6 +70,8 @@ module Endpoints
       get :phonebook_users do
         user = User.find_by_auth_token(params[:token])
         emails = params[:emails].split(",")
+        p '>>>>>>>>>>>>>>>'
+        p emails
         if user.present?
           pb_users = User.in(email:emails).reject{|u| user.is_friend(u)}
           info = pb_users.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', username:f.name, avatar:f.avatar_url}}
