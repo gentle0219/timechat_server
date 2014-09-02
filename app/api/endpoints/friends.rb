@@ -106,7 +106,7 @@ module Endpoints
         user  = User.find_by_auth_token(params[:token])
         if user.present?
           friend = User.where(email:email).first
-          if !user.is_friend(friend) and user.id != friend.id
+          if friend.present? and !user.is_friend(friend) and user.id != friend.id
             if friend.present?
               user.add_friend(friend)
               {data:friend.friend_api_detail(user), message:{type:'success',value:'Added new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}

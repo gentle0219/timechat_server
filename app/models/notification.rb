@@ -25,8 +25,8 @@ class Notification
       media = Medium.where(id:media_id).first
       info = {
               id:id.to_s,
-              date: created_at.strftime("%Y-%m-%d %H:%M:%S"),
-              additional:media.present? && media.media_type == "0" ? "2" : "1",
+              date: created_at.strftime("%Y-%m-%d %H:%M:%S"),              
+              additional:friend.avatar_url,
               debug: message,
               friend_time: friend.created_at.strftime("%Y-%m-%d %H:%M:%S"),
               from: friend.name,
@@ -43,7 +43,7 @@ class Notification
       info = {
               id:id.to_s,
               date: created_at.strftime("%Y-%m-%d %H:%M:%S"),
-              additional:"3",
+              additional:friend.avatar_url,
               debug: message,
               friend_time: friend.created_at,
               from: friend.name,
