@@ -69,11 +69,18 @@ module Endpoints
       #   emails      String *required
       get :phonebook_users do
         user = User.find_by_auth_token(params[:token])
-        emails = params[:emails].split(",")
-        p '>>>>>>>>>>>>>>>'
-        p emails
+        emails = params[:emails].split(",")        
         if user.present?
+          p '>>>>>>>>>>>>>>>'
+          p emails
+          p User.in(email:emails).count
+          
           pb_users = User.in(email:emails).reject{|u| user.is_friend(u)}
+
+          p '>>>>>>>>>>>>>>>'
+          p pb_users.count
+          p pb_users
+          
           info = pb_users.map{|f| {id:f.id.to_s, email:f.email, debug:'Friend List', username:f.name, avatar:f.avatar_url}}
           {data:info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
