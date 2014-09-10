@@ -152,7 +152,7 @@ class User
       user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
     end
     count = user.notifications.unread_notifications.count
-    user.send_push("#{friend.name} wants to add you in his friends", count)
+    user.send_push("#{accepted_user.name} wants to add you in his friends", count)
   end
 
   def send_decline_friend_notification(declined_user)
@@ -169,7 +169,7 @@ class User
 
     user.notifications.create(message:"#{declined_user.name} declined your invitiation to friends", data:declined_user.id.to_s, type:Notification::TYPE[1], status:TimeChatNet::Application::NOTIFICATION_DECLINE_FRIEND)
     count = user.notifications.unread_notifications.count
-    user.send_push("#{friend.name} wants to add you in his friends", count)
+    user.send_push("#{declined_user.name} wants to add you in his friends", count)
   end
 
   def send_ignore_friend_notification(ignored_user)
