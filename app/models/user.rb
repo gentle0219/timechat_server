@@ -146,13 +146,16 @@ class User
     invited_f_ids.delete(accepted_user.id.to_s)
     user.invited_friend_ids   = invited_f_ids.join(",")
     user.save
+    msg = ''
     if accepted_user.auto_accept_friend
-      user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends automatically", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
+      msg = "#{accepted_user.name} accepted your invitation to friends automatically"
+      user.notifications.create(message:msg, data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
     else
-      user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
+      msg = "#{accepted_user.name} accepted your invitation to friends"
+      user.notifications.create(message:msg, data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
     end
     count = user.notifications.unread_notifications.count
-    user.send_push("#{accepted_user.name} wants to add you in his friends", count)
+    user.send_push(msg, count)
   end
 
   def send_decline_friend_notification(declined_user)
@@ -166,10 +169,10 @@ class User
     user.friend_ids           = f_ids.uniq.join(",")
     user.invited_friend_ids   = invited_f_ids.uniq.join(",")
     user.save
-
-    user.notifications.create(message:"#{declined_user.name} declined your invitiation to friends", data:declined_user.id.to_s, type:Notification::TYPE[1], status:TimeChatNet::Application::NOTIFICATION_DECLINE_FRIEND)
+    msg = "#{declined_user.name} declined your invitiation to friends"
+    user.notifications.create(message:msg, data:declined_user.id.to_s, type:Notification::TYPE[1], status:TimeChatNet::Application::NOTIFICATION_DECLINE_FRIEND)
     count = user.notifications.unread_notifications.count
-    user.send_push("#{declined_user.name} wants to add you in his friends", count)
+    user.send_push(msg, count)
   end
 
   def send_ignore_friend_notification(ignored_user)
@@ -192,17 +195,28 @@ class User
     
     user.save
     removed_user.save
-    user.notifications.create(message:"#{removed_user.name} removed you from friends", data:removed_user.id.to_s, type:Notification::TYPE[4], status:TimeChatNet::Application::NOTIFICATION_REMOVED_FRIEND)
+    msg = "#{removed_user.name} removed you from friends"
+    user.notifications.create(message:msg, data:removed_user.id.to_s, type:Notification::TYPE[4], status:TimeChatNet::Application::NOTIFICATION_REMOVED_FRIEND)
+    
+    count = user.notifications.unread_notifications.count
+    user.send_push(msg, count)
   end
 
   def send_photo_shared_friend_notification(share_user, media)
-    user = self
-    user.notifications.create(message:"#{share_user.name} shared new photo", data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_PHOTO)
+    user  = self
+    msg   = "#{share_user.name} shared new photo"
+    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_PHOTO)
+
+    count = user.notifications.unread_notifications.count
+    user.send_push(msg, count)
   end
 
   def send_video_shared_friend_notification(share_user, media)
     user = self
-    user.notifications.create(message:"#{share_user.name} shared new video", data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_VIDEO)
+    msg  = "#{share_user.name} shared new video"
+    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_VIDEO)
+    count = user.notifications.unread_notifications.count
+    user.send_push(msg, count)
   end
   
   def send_notification_add_new_comment(comment_user)
