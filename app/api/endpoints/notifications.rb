@@ -42,15 +42,12 @@ module Endpoints
       # POST: /api/v1/notifications/had_read_notification
       # parameters:
       #   token               String *required
-      #   notification_ids    String *required
+      #   notification_id     String *required
       post :had_read_notification do
-        user              = User.find_by_auth_token(params[:token])
-        notification_ids  = params[:notification_ids].split(",")
+        user    = User.find_by_auth_token(params[:token])        
         if user.present?
-          notifications  = Notification.in(id:notification_ids)
-          notifications.each do |notif|
-            notif.update_attributes(status:1)
-          end
+          notif  = Notification.find(params[:notification_id])
+          notif.update_attributes(status:1)
           {data:[], message:{type:'success',value:'read notifications', code: 0}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
