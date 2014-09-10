@@ -15,8 +15,7 @@ class Notification
 
 
   belongs_to :user
-  # scope :unread_notifications, ->{where(is_read:false)}  
-  scope :unread_notifications, ->{where(status:0)}
+  scope :unread_notifications, ->{where(is_read:false)}
 
   after_create :send_mail
 

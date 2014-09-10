@@ -47,7 +47,7 @@ module Endpoints
         user    = User.find_by_auth_token(params[:token])        
         if user.present?
           notif  = Notification.find(params[:notification_id])
-          notif.update_attributes(status:1)
+          notif.update_attributes(is_read:true)
           {data:[], message:{type:'success',value:'read notifications', code: 0}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
