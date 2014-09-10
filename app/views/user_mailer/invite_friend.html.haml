@@ -3,7 +3,8 @@
   %head
     %meta{content: "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    .header    
+    .header
+      = image_tag root_url + ActionController::Base.helpers.asset_path("email_template_header.png")
     .content
       %h3
         Dear
@@ -19,6 +20,7 @@
         TimeChat team
 
     .footer
+      = image_tag root_url + ActionController::Base.helpers.asset_path("email_template_mark.png")
 
 :css
   p, h3{
@@ -27,15 +29,7 @@
   h3{
     margin: 0px;
   }
-  .header{
-    background: url("http://192.168.0.55:3000/assets/email_template_header.png");
-    height: 98px;
-  }
-  .footer{
-    background: url("http://192.168.0.55:3000/assets/email_template_mark.png") no-repeat;
-    height: 50px;
-  }
-
+    
 :javascript
   var elem = document.getElementById("message_headers");
   elem.remove();      

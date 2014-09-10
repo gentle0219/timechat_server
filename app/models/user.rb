@@ -315,7 +315,7 @@ class User
     end
   end
 
-  def send_push(messge, count)
+  def send_push(message, count)
     return false if self.devices.count < 0
     devices = self.devices
     devices.each do |device|
