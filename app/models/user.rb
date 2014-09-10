@@ -136,7 +136,7 @@ class User
 
   def send_invite_friend_notification(friend)
     self.notifications.create(message:"#{friend.name} wants to add you in his friends", data:friend.id.to_s, type:Notification::TYPE[0], status:TimeChatNet::Application::NOTIFICATION_INVITE_IN_FRIEND)
-    count = self.notifications.unread_notifications.count
+    count = self.unread_notifications.count
     self.send_push("#{friend.name} wants to add you in his friends", count)
   end
 
@@ -154,7 +154,7 @@ class User
       msg = "#{accepted_user.name} accepted your invitation to friends"
       user.notifications.create(message:msg, data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
     end
-    count = user.notifications.unread_notifications.count
+    count = user.unread_notifications.count
     user.send_push(msg, count)
   end
 
@@ -171,7 +171,7 @@ class User
     user.save
     msg = "#{declined_user.name} declined your invitiation to friends"
     user.notifications.create(message:msg, data:declined_user.id.to_s, type:Notification::TYPE[1], status:TimeChatNet::Application::NOTIFICATION_DECLINE_FRIEND)
-    count = user.notifications.unread_notifications.count
+    count = user.unread_notifications.count
     user.send_push(msg, count)
   end
 
@@ -198,7 +198,7 @@ class User
     msg = "#{removed_user.name} removed you from friends"
     user.notifications.create(message:msg, data:removed_user.id.to_s, type:Notification::TYPE[4], status:TimeChatNet::Application::NOTIFICATION_REMOVED_FRIEND)
     
-    count = user.notifications.unread_notifications.count
+    count = user.unread_notifications.count
     user.send_push(msg, count)
   end
 
@@ -207,7 +207,7 @@ class User
     msg   = "#{share_user.name} shared new photo"
     user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_PHOTO)
 
-    count = user.notifications.unread_notifications.count
+    count = user.unread_notifications.count
     user.send_push(msg, count)
   end
 
@@ -215,7 +215,7 @@ class User
     user = self
     msg  = "#{share_user.name} shared new video"
     user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_VIDEO)
-    count = user.notifications.unread_notifications.count
+    count = user.unread_notifications.count
     user.send_push(msg, count)
   end
   

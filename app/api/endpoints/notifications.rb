@@ -13,7 +13,7 @@ module Endpoints
       get do
         user = User.find_by_auth_token(params[:token])
         if user.present?
-          notifications = user.unread_notifications
+          notifications = user.notifications
           notif_info = notifications.map{|notif| notif.api_detail}
           {data:notif_info, message:{type:'success',value:'notifications', code: 0}}
         else
@@ -39,12 +39,22 @@ module Endpoints
       end
       
       # Delete notification
-      # POST: /api/v1/notifications/delete
+      # POST: /api/v1/notifications/had_read_notification
       # parameters:
       #   token               String *required
-      #   notification_id     String *required
+      #   notification_ids    String *required
       post :had_read_notification do
-        
+        user              = User.find_by_auth_token(params[:token])
+        notification_ids  = params[:notification_ids].split(",")
+        if user.present?
+          notifications  = Notification.in(id:notification_ids)
+          notifications.each do |notif|
+            notif.update_attributes(status:1)
+          end
+          {data:[], message:{type:'success',value:'read notifications', code: 0}}
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
+        end
       end
 
     end #notifications
