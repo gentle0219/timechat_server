@@ -26,9 +26,7 @@ class HomeController < ApplicationController
       case social_type
       when User::SOCIAL_TYPES[0]    # if social type is email
         user = User.new
-        status = user.update_attributes(email:email,password:password,password_confirmation:password,name:user_name, time_zone:time_zone)
-        user.send_notification_to_all_users
-        UserMailer.welcome(user).deliver
+        status = user.update_attributes(email:email,password:password,password_confirmation:password,name:user_name, time_zone:time_zone)        
       when User::SOCIAL_TYPES[1]    # if social type is facebook
         user = User.where(email:email).first
         if user.present?
@@ -66,12 +64,17 @@ class HomeController < ApplicationController
       end
 
       if status == false
-        render :json => {:error => user.errors.messages}
+        msg = user.errors.messages.first.join(' ')
+        msg = msg.gsub('name', 'username').gsub('taken', 'existed').gsub(' is ', ' has ')
+        render :json => {data:[],message:{type:'error',value:msg.capitalize, code: TimeChatNet::Application::ERROR_LOGIN}}
       else        
         Device.create_by_device_id(dev_id, user)
         user = sign_in( :user, user )
         user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar_url}
-
+        if social_type == User::SOCIAL_TYPES[0]
+          user.send_notification_to_all_users
+          UserMailer.welcome(user).deliver
+        end
         render :json => {data:user_info,message:{type:'success',value:'Signed up successfully', code: TimeChatNet::Application::SUCCESS_LOGIN}}
       end
     end     
@@ -85,8 +88,8 @@ class HomeController < ApplicationController
 
     resource = User.find_for_database_authentication( :email => email )
     
-    if resource.nil?
-      render :json => {failed:'No Such User'}, :status => 401
+    if resource.nil?      
+      render :json => {data:[],message:{type:'error',value:"#{email} doesn't exist. Please register", code: TimeChatNet::Application::ERROR_LOGIN}}
     else      
       if resource.valid_password?( password )
         Device.create_by_device_id(dev_id,resource)
@@ -96,7 +99,7 @@ class HomeController < ApplicationController
         
         render :json => {data:user_info,message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}
       else
-        render :json => {data:user_info,message:{type:'error',value:'signin failed', code: TimeChatNet::Application::ERROR_LOGIN}}
+        render :json => {data:[],message:{type:'error',value:'Password is incorrect', code: TimeChatNet::Application::ERROR_LOGIN}}
       end
     end
    end

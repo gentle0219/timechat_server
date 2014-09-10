@@ -83,7 +83,7 @@ class User
   
 
 
-
+  validates_uniqueness_of :name
   validates_presence_of :role
   
   def unread_notifications
@@ -136,6 +136,8 @@ class User
 
   def send_invite_friend_notification(friend)
     self.notifications.create(message:"#{friend.name} wants to add you in his friends", data:friend.id.to_s, type:Notification::TYPE[0], status:TimeChatNet::Application::NOTIFICATION_INVITE_IN_FRIEND)
+    count = self.notifications.unread_notifications.count
+    self.send_push("#{friend.name} wants to add you in his friends", count)
   end
 
   def send_accept_friend_notification(accepted_user)
@@ -148,7 +150,9 @@ class User
       user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends automatically", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
     else
       user.notifications.create(message:"#{accepted_user.name} accepted your invitation to friends", data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
-    end    
+    end
+    count = user.notifications.unread_notifications.count
+    user.send_push("#{friend.name} wants to add you in his friends", count)
   end
 
   def send_decline_friend_notification(declined_user)
@@ -164,6 +168,8 @@ class User
     user.save
 
     user.notifications.create(message:"#{declined_user.name} declined your invitiation to friends", data:declined_user.id.to_s, type:Notification::TYPE[1], status:TimeChatNet::Application::NOTIFICATION_DECLINE_FRIEND)
+    count = user.notifications.unread_notifications.count
+    user.send_push("#{friend.name} wants to add you in his friends", count)
   end
 
   def send_ignore_friend_notification(ignored_user)
@@ -219,6 +225,10 @@ class User
     return true if friend.id == self.id
     friend_ids.split(",").include?(friend.id.to_s) and !invited_friend_ids.split(",").include?(friend.id.to_s) # and !ignored_friend_ids.split(",").include?(friend.id.to_s)
   end  
+
+  def is_invited_friend(friend)
+    invited_friend_ids.split(",").include?(friend.id.to_s)
+  end
 
   def is_block(friend)
     if ignored_friend_ids.split(",").include? friend.id.to_s
@@ -302,6 +312,22 @@ class User
       avatar.url
     else
       ""
+    end
+  end
+
+  def send_push(messge, count)
+    return false if self.devices.count < 0
+    devices = self.devices
+    devices.each do |device|
+      if Rails.env.production?
+        if device.platform == Device::DEVICE_PLATFORM[0]    # in case platform is ios
+          APNS.send_notification(device.dev_id,alert:message, badge:count, sound: 'default')
+        else
+          destination = [device.dev_id]
+          data = {:alert=>notification.message}
+          GCM.send_notification(destination,data)
+        end
+      end
     end
   end
 

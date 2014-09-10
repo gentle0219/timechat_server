@@ -107,15 +107,19 @@ module Endpoints
         user  = User.find_by_auth_token(params[:token])
         if user.present?
           friend = User.where(email:email).first
-          if friend.present? and !user.is_friend(friend) and user.id != friend.id
-            if friend.present?
+          if friend.present?
+            if user.id == friend.id
+              {data:[], message:{type:'error',value:"#{email} is your email", code: TimeChatNet::Application::USER_UNREGISTERED}}
+            elsif user.is_friend(friend)
+              {data:[], message:{type:'error',value:"#{email} is your friend now", code: TimeChatNet::Application::USER_UNREGISTERED}}
+            elsif user.is_invited_friend(friend)
+              {data:[], message:{type:'error',value:"#{email} is already invited", code: TimeChatNet::Application::USER_UNREGISTERED}}
+            else
               user.add_friend(friend)
               {data:friend.friend_api_detail(user), message:{type:'success',value:'Added new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
-            else
-              {data:[], message:{type:'error',value:'Can not find this friend', code: TimeChatNet::Application::USER_UNREGISTERED}}  
             end
           else
-            {data:[], message:{type:'error',value:'Already invited friend', code: TimeChatNet::Application::USER_UNREGISTERED}}
+            {data:[], message:{type:'error',value:"#{email} dosen't exist", code: TimeChatNet::Application::USER_UNREGISTERED}}
           end
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::USER_UNREGISTERED}}
@@ -126,21 +130,26 @@ module Endpoints
       # POST: /api/v1/friends/add_friend_by_username
       # parameters:
       #   token               String *required
-      #   username               String *required
+      #   username            String *required
       post :add_friend_by_username do
         username  = params[:username]
         user      = User.find_by_auth_token(params[:token])
         if user.present?
           friend = User.where(name:username).first
-          if !user.is_friend(friend) and user.id != friend.id
-            if friend.present?
+
+          if friend.present?
+            if user.id == friend.id
+              {data:[], message:{type:'error',value:"#{username} is your username", code: TimeChatNet::Application::USER_UNREGISTERED}}
+            elsif user.is_friend(friend)
+              {data:[], message:{type:'error',value:"#{username} is your friend now", code: TimeChatNet::Application::USER_UNREGISTERED}}
+            elsif user.is_invited_friend(friend)
+              {data:[], message:{type:'error',value:"#{username} is already invited", code: TimeChatNet::Application::USER_UNREGISTERED}}
+            else
               user.add_friend(friend)
               {data:friend.friend_api_detail(user), message:{type:'success',value:'Added new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
-            else
-              {data:[], message:{type:'error',value:'Can not find this friend', code: TimeChatNet::Application::USER_UNREGISTERED}}  
             end
           else
-            {data:[], message:{type:'error',value:'Already invited friend', code: TimeChatNet::Application::USER_UNREGISTERED}}
+            {data:[], message:{type:'error',value:"#{username} dosen't exist", code: TimeChatNet::Application::USER_UNREGISTERED}}
           end
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::USER_UNREGISTERED}}

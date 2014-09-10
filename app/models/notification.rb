@@ -40,7 +40,8 @@ class Notification
             }
     else    
       friend = User.where(id:data).first
-      info = {
+      if friend.present?
+        info = {
               id:id.to_s,
               date: created_at.strftime("%Y-%m-%d %H:%M:%S"),
               additional:friend.avatar_url,
@@ -54,6 +55,9 @@ class Notification
               user_id: friend.id.to_s,
               user_time: user.created_at
             }
+      else
+        {}
+      end
     end
   end
 
