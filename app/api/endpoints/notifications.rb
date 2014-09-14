@@ -41,13 +41,14 @@ module Endpoints
       # Delete notification
       # POST: /api/v1/notifications/had_read_notification
       # parameters:
-      #   token               String *required
-      #   notification_id     String *required
+      #   token               String *required      
       post :had_read_notification do
         user    = User.find_by_auth_token(params[:token])        
         if user.present?
-          notif  = Notification.find(params[:notification_id])
-          notif.update_attributes(is_read:true)
+          notifications = user.unread_notifications          
+          notifications.each do |notif|
+            notif.update_attributes(is_read:true)
+          end
           {data:[], message:{type:'success',value:'read notifications', code: 0}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}

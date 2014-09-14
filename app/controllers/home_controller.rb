@@ -86,7 +86,12 @@ class HomeController < ApplicationController
     dev_id          = params[:dev_id]
     timezone        = params[:timezone]
 
-    resource = User.find_for_database_authentication( :email => email )
+    user = User.where(email:email).first
+    unless user.present?
+    user = User.where(name:email).first
+    end
+    resource = user
+    # resource = User.find_for_database_authentication(:email => email)
     
     if resource.nil?      
       render :json => {data:[],message:{type:'error',value:"#{email} doesn't exist. Please register", code: TimeChatNet::Application::ERROR_LOGIN}}
