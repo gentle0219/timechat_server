@@ -81,7 +81,7 @@ class HomeController < ApplicationController
   end
   
   def create_session
-    email           = params[:email]
+    email           = params[:email].delete(" ")
     password        = params[:password]
     dev_id          = params[:dev_id]
     timezone        = params[:timezone]
@@ -93,7 +93,7 @@ class HomeController < ApplicationController
     resource = user
     # resource = User.find_for_database_authentication(:email => email)
     
-    if resource.nil?      
+    if resource.nil?
       render :json => {data:[],message:{type:'error',value:"#{email} doesn't exist. Please register", code: TimeChatNet::Application::ERROR_LOGIN}}
     else      
       if resource.valid_password?( password )
