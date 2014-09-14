@@ -62,6 +62,7 @@ class User
   field :push_enable,               :type => Boolean,   default: true
   field :sound_enable,              :type => Boolean,   default: true
 
+  field :theme_type,                :type => String,    default: "1"
 
   field :authentication_token,      :type => String  
   before_save :ensure_authentication_token

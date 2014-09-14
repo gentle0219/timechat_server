@@ -24,7 +24,7 @@ module Endpoints
       get :setting do
         user = User.find_by_auth_token(params[:token])
         if user.present?
-          {data:{push_enable:user.push_enable,sound_enable:user.sound_enable,auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend},message:{type:'success',value:'account setting', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          {data:{push_enable:user.push_enable,sound_enable:user.sound_enable,auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend, theme_type:user.theme_type},message:{type:'success',value:'account setting', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[],message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
         end
@@ -203,6 +203,25 @@ module Endpoints
         end
       end
 
+      # Privacy setup
+      # POST: /api/v1/accounts/theme_setting
+      # parameters:
+      #   token                 String *required
+      #   theme_type            String
+      
+      post :theme_setting do
+        theme_type = params[:theme_type]
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          if user.update_attributes(theme_type:theme_type)
+            {data:[], message:{type:'success',value:'Theme type', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[], message:{type:'error',value:'Can not theme type setting', code: TimeChatNet::Application::ERROR_QUERY}}  
+          end
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
 
     end # end accounts
   end
