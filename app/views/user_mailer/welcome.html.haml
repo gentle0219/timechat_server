@@ -3,7 +3,8 @@
   %head
     %meta{content: "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    .header{style:'height:98px;background: url("http://timechatnet.herokuapp.com/assets/email_template_header.png");'}
+    .header
+      = image_tag root_url + ActionController::Base.helpers.asset_path("email_template_header.png"), style: "height:98px;"
     .content
       %h2= "Hi #{@user.name}!"
       %h2
@@ -11,7 +12,7 @@
         %sup TM
       %hr{style:"background-color: #8bc4E0;height: 2px;border: none;"}
       %p{style:"color: red;"}
-        If you didn't make this request, you could cancel the account by clicking the link below and it will peermantely be removed off our system.
+        If you didn't make this request, you could cancel the account by clicking the link below and it will permanently be removed off our system.
       %p{style:"color: red;"}
         %h2{style:"color:red;margin:0px;"} PLEASE ONLY CLICK IF YOU WANT TO REMOVE THIS ACCOUNT
         %h2{style:"color:red;margin:0px;"} (ACTION CANNOT BE UNDONE!)
@@ -21,7 +22,9 @@
 
       %p
         Other members cannot see your e-mail address. We do not spam and this may be the last e-mail you receive from us. You will however, receive a notification e-mail
-    .footer{style:'background: url("http://timechatnet.herokuapp.com/assets/email_template_mark.png") no-repeat;height: 50px;'}
+    .footer
+      = image_tag root_url + ActionController::Base.helpers.asset_path("email_template_mark.png"), style: "height:50px;"      
+    
   
 :javascript
   var elem = document.getElementById("message_headers");
