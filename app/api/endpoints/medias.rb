@@ -236,6 +236,43 @@ module Endpoints
         end
       end
 
+      # Get media info and post media
+      # POST: /api/v1/medias/main_page_info
+      # parameters:
+      #   token               String *required
+      #   media_id            String *required
+      #   media_exist         Boolean
+      #   media_type          String
+      #   video_thumb         String
+      #   media               String
+      post :main_page_info do
+        user        = User.find_by_auth_token(params[:token])        
+        media_id    = params[:media_id]
+        media_exist = params[:media_exist]
+        media_type  = params[:media_type]
+        video_thumb = params[:video_thumb]        
+        media       = params[:media]
+        if user.present?
+          if media_exist == '1'
+            if media_type == '1'
+              media = user.medias.build(file:media, media_type:media_type)
+            else
+              media = user.medias.build(file:media, media_type:media_type, video_thumb:video_thumb)
+            end            
+            if media.save
+              {data:{id:media.id.to_s,filename:media.media_url, like_count:0, comment_count:0, notification_count:user.notifications.count}, message:{type:'success',value:'success uploaded', code:TimeChatNet::Application::SUCCESS_UPLOADED}}
+            else
+              {data:media.errors.full_messages.first,message:{type:'error',value:'Can not create this media', code:TimeChatNet::Application::ERROR_LOGIN}}
+            end
+          else
+            media = Media.find(params[media_id])
+            {data:{id:'',filename:'', like_count:media.likes.count, comment_count:media.comments.count, notification_count:user.notifications.count}, message:{type:'success',value:'success uploaded', code:TimeChatNet::Application::SUCCESS_QUERY}}
+          end          
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
+
 
     end #end medias
   end
