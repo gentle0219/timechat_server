@@ -265,7 +265,7 @@ module Endpoints
               {data:media.errors.full_messages.first,message:{type:'error',value:'Can not create this media', code:TimeChatNet::Application::ERROR_LOGIN}}
             end
           else
-            media = Media.find(params[:media_id])
+            media = Medium.find(params[:media_id])
             {data:{id:'',filename:'', like_count:media.likes.count, comment_count:media.comments.count, notification_count:user.notifications.count}, message:{type:'success',value:'success uploaded', code:TimeChatNet::Application::SUCCESS_QUERY}}
           end          
         else
