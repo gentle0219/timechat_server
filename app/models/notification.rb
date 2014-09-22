@@ -20,6 +20,8 @@ class Notification
   after_create :send_mail
 
   def api_detail
+    notif = self
+    notif.update_attributes(is_read:true)
     if self.type == Notification::TYPE[5]
       friend = User.where(id:data).first
       media = Medium.where(id:media_id).first
