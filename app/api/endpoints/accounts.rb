@@ -30,6 +30,70 @@ module Endpoints
         end
       end
 
+
+      # Change profile
+      # POST: /api/v1/accounts/change_password
+      # parameters:
+      #   token             String *required
+      #   old_password      String *required
+      #   new_password      String *required
+      #   user_name         String *required
+      #   new_email         String *required
+      #   avatar            String *required
+      post :change_profile do
+
+        old_password = params[:old_password]
+        new_password = params[:new_password]
+        
+        user_name    = params[:user_name]
+        new_email    = params[:new_email]
+
+        avatar       = params[:avatar]
+
+        is_changed   = true        
+        user = User.find_by_auth_token(params[:token])
+        
+        if user.present?          
+          if new_password.present?
+            if user.valid_password?(old_password)
+              user.password = new_password
+              user.password_confirmation = new_password
+              unless user.save
+                is_changed = false
+              end
+            else
+              is_changed = false
+            end
+          end
+
+          if user_name.present?
+            unless user.update_attribute(:name, user_name)
+              is_changed = false
+            end
+          end
+
+          if new_email.present?
+            unless user.update_attribute(:email, new_email)
+              is_changed = false
+            end
+          end
+
+          if avatar.present?
+            unless user.update_attribute(:avatar,avatar)
+              is_changed = false
+            end
+          end
+
+          if is_changed
+            {data:[],message:{type:'success',value:'Changed profile successfully', code:TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[],message:{type:'faild',value:'Cannot Changed profile', code:TimeChatNet::Application::ERROR_QUERY}}
+          end
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_CHANGE_PASSWORD}}
+        end
+      end
+
       # Change Password
       # POST: /api/v1/accounts/change_password
       # parameters:

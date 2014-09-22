@@ -44,6 +44,12 @@ module TimeChatNet
     NOTICE_CUSTOM               = 25
     ERROR_SEND_MAIL             = 26
 
+    #profile change value
+
+    SUCCESS_CHANGE_USER_NAME    = 27
+    SUCCESS_CHANGE_EMAIL        = 28
+    
+
     # user invited status
     USER_REGISTERED         = 201
     USER_UNREGISTERED       = 202
