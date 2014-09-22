@@ -221,9 +221,10 @@ module Endpoints
         if user.present?
           media = Medium.find(media_id)
           if media.present?
-            like = media.likes.build(user:user)
+            like  = media.likes.build(user:user)
+            likes = media.likes
             if like.save
-              {data:[],message:{type:'success',value:'added like', code:TimeChatNet::Application::SUCCESS_QUERY}}  
+              {data:{count:likes.count},message:{type:'success',value:'added like', code:TimeChatNet::Application::SUCCESS_QUERY}}  
             else
               {data:like.errors.messages,message:{type:'error',value:'added like', code:TimeChatNet::Application::SUCCESS_QUERY}}  
             end

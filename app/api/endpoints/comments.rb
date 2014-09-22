@@ -19,8 +19,9 @@ module Endpoints
         if user.present?
           media = Medium.find(media_id)
           if media.present?
-            comments = media.comments.map{|cm| cm.api_detail}
-            {data:comments,message:{type:'success',value:'get comments', code:TimeChatNet::Application::SUCCESS_QUERY}}
+            comments  = media.comments.map{|cm| cm.api_detail}
+            likes     = media.likes
+            {data:{comments:comments, like_count:likes.count},message:{type:'success',value:'get comments', code:TimeChatNet::Application::SUCCESS_QUERY}}
           else
             {data:[],message:{type:'error',value:'Can not find media', code:TimeChatNet::Application::MEDIA_NOT_FOUND}}
           end
@@ -44,10 +45,13 @@ module Endpoints
           media = Medium.find(media_id)
           if media.present?
             owner = media.user
-            comment = media.comments.create(comment:comment,user:user)
+            comment   = media.comments.create(comment:comment,user:user)
+            
+            comments  = media.comments.map{|cm| cm.api_detail}
+            likes     = media.likes
+
             owner.send_push_notification("You have received an comment from #{user.name}")
-            # media.user.send_notification_add_new_comment(user)
-            {data:{id:comment.id, comment:comment.comment, user_id:user.id.to_s},message:{type:'success',value:'Added new Comment', code:TimeChatNet::Application::SUCCESS_QUERY}}
+            {data:{comments:comments, like_count:likes.count},message:{type:'success',value:'Added new comment successfully', code:TimeChatNet::Application::SUCCESS_QUERY}}
           else
             {data:[],message:{type:'error',value:'Can not find media', code:TimeChatNet::Application::MEDIA_NOT_FOUND}}
           end
