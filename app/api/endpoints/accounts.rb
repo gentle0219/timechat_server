@@ -3,17 +3,16 @@ module Endpoints
 
     resource :accounts do
       # Forgot Password
-      # GET: /api/v1/accounts/forgot_password
+      # POST: /api/v1/accounts/forgot_password
       # parameters:
       #   email:      String *required
-
-      get :forgot_password do
+      post :forgot_password do
         user = User.where(email:params[:email]).first
         if user.present?
           UserMailer.forgot_password(user).deliver          
-          {data:[],message:{type:'success',value:'Email was sent successfully', code: TimeChatNet::Application::ERROR_LOGIN}}
+          {data:[],message:{type:'success',value:'Please confirm your email address.', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
-          {:failed => 'Cannot find your email'}
+          {data:[],message:{type:'faild',value:'Cannot find this email', code: TimeChatNet::Application::ERROR_QUERY}}
         end
       end
 
@@ -32,7 +31,7 @@ module Endpoints
 
 
       # Change profile
-      # POST: /api/v1/accounts/change_password
+      # POST: /api/v1/accounts/change_profile
       # parameters:
       #   token             String *required
       #   old_password      String *required
