@@ -336,7 +336,7 @@ class User
     devices.each do |device|
       if Rails.env.production?
         if device.platform == Device::DEVICE_PLATFORM[0]    # in case platform is ios
-          APNS.send_notification(device.dev_id,alert:message, badge:count, sound: 'default')
+          APNS.send_notification(device.dev_id,alert:message, badge:count, sound: 'default') if device.dev_id.present?
         else
           destination = [device.dev_id]
           data = {:alert=>notification.message}
@@ -352,7 +352,7 @@ class User
     devices.each do |device|
       if Rails.env.production?
         if device.platform == Device::DEVICE_PLATFORM[0]    # in case platform is ios
-          APNS.send_notification(device.dev_id,alert:message, badge:device.badge_count+1, sound: 'default')
+          APNS.send_notification(device.dev_id,alert:message, badge:device.badge_count+1, sound: 'default') if device.dev_id.present?
         else
           destination = [device.dev_id]
           data = {:alert=>notification.message}
