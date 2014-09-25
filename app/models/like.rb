@@ -5,7 +5,7 @@ class Like
   belongs_to :user
   belongs_to :media, class_name: 'Medium'
 
-  after_create :send_notification
+  # after_create :send_notification
 
   def api_detail
     {
