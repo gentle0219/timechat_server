@@ -28,15 +28,15 @@ class Notification
       info = {
               id:id.to_s,
               date: created_at.strftime("%Y-%m-%d %H:%M:%S"),              
-              additional:friend.avatar_url,
+              friend_avatar:friend.avatar_url,
               debug: message,
               friend_time: friend.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-              from: friend.name,
-              fromEmail: friend.email,
+              friend_name: friend.name,
+              friend_email: friend.email,
               status: is_read,
               status_info: "Sent notification",
               type: status,
-              user_id: friend.id.to_s,
+              friend_id: friend.id.to_s,
               user_time: user.time,
               media_id:media_id
             }
@@ -46,15 +46,15 @@ class Notification
         info = {
               id:id.to_s,
               date: created_at.strftime("%Y-%m-%d %H:%M:%S"),
-              additional:friend.avatar_url,
+              friend_avatar:friend.avatar_url,
               debug: message,
               friend_time: friend.created_at,
-              from: friend.name,
-              fromEmail: friend.email,
+              friend_name: friend.name,
+              friend_email: friend.email,
               status: is_read,
               status_info: "Sent notification",
               type: status,
-              user_id: friend.id.to_s,
+              friend_id: friend.id.to_s,
               user_time: user.created_at
             }
       else
