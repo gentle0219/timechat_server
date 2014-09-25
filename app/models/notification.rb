@@ -39,7 +39,7 @@ class Notification
               friend_id: friend.id.to_s,
               user_time: user.time,
               media_id:media_id,
-              media_created_time:media.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+              media_created_time:media.created_time(user.time_zone),
             }
     else    
       friend = User.where(id:data).first

@@ -73,9 +73,19 @@ class Medium
   # end
 
 
+  def created_time(timezone)
+    timezone = timezone.present? ? timezone.to_i : 0
+    server_time_zone_offset = Time.now.gmt_offset
+    offset = server_time_zone_offset / 60 / 60
+    time = timezone + offset 
+    created_time = created_at + time.hour    
+    created_time.strftime("%Y-%m-%d %H:%M:%S")
+  end
+
   def self.shared_medias(to_user)
     self.where({:shared_ids => /.*#{to_user.id.to_s}*./})
   end
+
 
   def self.medias_by_time(hour)
     server_time_zone_offset = Time.now.gmt_offset
