@@ -101,8 +101,8 @@ class HomeController < ApplicationController
         Device.create_by_device_id(dev_id,resource)
         user = sign_in(:user, resource)
         resource.update_attributes(time_zone:timezone)
-        user_info ={id:resource.id.to_s, username:resource.name,email:resource.email,token:resource.authentication_token,avatar:resource.avatar_url}
-        setting   = {push_enable:user.push_enable,sound_enable:user.sound_enable,auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend, theme_type:user.theme_type}
+        user_info = { id:resource.id.to_s, username:resource.name,email:resource.email,token:resource.authentication_token,avatar:resource.avatar_url}
+        setting   = { push_enable:resource.push_enable,sound_enable:resource.sound_enable,auto_accept_friend:resource.auto_accept_friend,auto_notify_friend:resource.auto_notify_friend, theme_type:resource.theme_type}
         render :json => {data:{user_info:user_info, setting:setting},message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}
       else
         render :json => {data:[],message:{type:'error',value:'Password is incorrect', code: TimeChatNet::Application::ERROR_LOGIN}}
