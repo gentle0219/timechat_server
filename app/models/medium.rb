@@ -19,6 +19,8 @@ class Medium
 
   validates_presence_of :file, :user_id
 
+  # default_scope -> {where(:created_at.gte => DateTime.new(Time.now.year,Time.now.month,Time.now.day))}
+
   def media_url
   	self.file.url if file.present?
   end

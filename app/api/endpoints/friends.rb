@@ -135,7 +135,7 @@ module Endpoints
         username  = params[:username]
         user      = User.find_by_auth_token(params[:token])
         if user.present?
-          friend = User.where(name:username).first
+          friend = User.where({:name=>/^.*#{username}.*$/i}).first
 
           if friend.present?
             if user.id == friend.id

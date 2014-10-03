@@ -5,7 +5,9 @@ class Like
   belongs_to :user
   belongs_to :media, class_name: 'Medium'
 
-  # after_create :send_notification
+  validates_uniqueness_of :user_id, scope: :media_id
+  
+  after_create :send_notification
 
   def api_detail
     {

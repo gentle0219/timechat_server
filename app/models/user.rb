@@ -256,7 +256,7 @@ class User
   def time
     server_time_zone_offset = Time.now.gmt_offset
     offset = server_time_zone_offset / 60 / 60
-    Time.now + (time_zone.to_i-offset).hours
+    Time.now + ((time_zone.to_i)-offset).hours
   end
   def add_friend(friend)    
     user                      = self
@@ -373,6 +373,10 @@ class User
     end
   end
 
+  def clear_media
+    medias  = self.medias.where(:created_at.lte => DateTime.new(Time.now.year,Time.now.month,Time.now.day-2))
+    medias.destroy_all
+  end
 
   private
   def generate_authentication_token

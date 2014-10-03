@@ -81,10 +81,15 @@ module Endpoints
       #   token               String *required
       #   friend_id           String *required
       get :medias_for_friend do
-        user = User.find_by_auth_token(params[:token])        
+        user = User.find_by_auth_token(params[:token])
         friend = User.find(params[:friend_id])
         if user.present?
-          medias  = friend.medias
+          timezone = friend.time_zone.to_i
+          friend_time = Time.now + timezone.hour
+          friend.clear_media
+          
+          st_date = DateTime.new(friend_time.year,friend_time.month,friend_time.day) - timezone.hour
+          medias  = friend.medias.where(:created_at.gte => st_date)
           info    = medias.map{|m| {id:m.id.to_s, filename:m.media_url, thumb:m.thumb_url, type:m.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:m.created_at.strftime("%Y-%m-%d %H:%M:%S")}}
           {data:info,message:{type:'success',value:'get all medias', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
@@ -226,7 +231,7 @@ module Endpoints
             if like.save
               {data:{count:likes.count},message:{type:'success',value:'added like', code:TimeChatNet::Application::SUCCESS_QUERY}}  
             else
-              {data:like.errors.messages,message:{type:'error',value:'added like', code:TimeChatNet::Application::SUCCESS_QUERY}}  
+              {data:like.errors.full_messages.first,message:{type:'error',value:'add like error', code:TimeChatNet::Application::SUCCESS_QUERY}}  
             end
             
           else
@@ -261,13 +266,16 @@ module Endpoints
               media = user.medias.build(file:media, media_type:media_type, video_thumb:video_thumb)
             end            
             if media.save
-              {data:{id:media.id.to_s,filename:media.media_url, like_count:0, comment_count:0, notification_count:user.notifications.count}, message:{type:'success',value:'success uploaded', code:TimeChatNet::Application::SUCCESS_UPLOADED}}
+              {data:{id:media.id.to_s,filename:media.media_url, like_count:0, comment_count:0, notification_count:user.unread_notifications.count}, message:{type:'success',value:'success uploaded', code:TimeChatNet::Application::SUCCESS_UPLOADED}}
             else
               {data:media.errors.full_messages.first,message:{type:'error',value:'Can not create this media', code:TimeChatNet::Application::ERROR_LOGIN}}
             end
           else
-            media = Medium.find(params[:media_id])
-            {data:{id:'',filename:'', like_count:media.likes.count, comment_count:media.comments.count, notification_count:user.notifications.count}, message:{type:'success',value:'success uploaded', code:TimeChatNet::Application::SUCCESS_QUERY}}
+            media = Medium.where(id:params[:media_id]).first
+            likes = media.present? ? media.likes.count : 0
+            comments = media.present? ? media.comments.count : 0
+            filename = media.media_type == '0' ? media.thumb_url : media.media_url
+            {data:{id:media.id.to_s,filename:filename, like_count:likes, comment_count:comments, notification_count:user.unread_notifications.count}, message:{type:'success',value:'success query', code:TimeChatNet::Application::SUCCESS_QUERY}}
           end          
         else
           {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}

@@ -6,6 +6,8 @@ class Comment
   
   belongs_to :medium
   belongs_to :user
+  
+  after_create :send_notification
 
   def api_detail
     {
@@ -20,5 +22,13 @@ class Comment
       user_time:Time.now+user.time_zone.to_i,
       user_name:user.name
     }
+  end
+
+  def send_notification
+    media_user = medium.user
+    unless user == media_user
+      media_user.send_notification_like_your_photo(user, medium.media_type) 
+      media_user.send_push_notification("#{user.name} favorited your photo")
+    end    
   end
 end

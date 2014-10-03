@@ -50,7 +50,7 @@ module Endpoints
             comments  = media.comments.map{|cm| cm.api_detail}
             likes     = media.likes
 
-            owner.send_push_notification("You have received an comment from #{user.name}")
+            # owner.send_push_notification("You have received an comment from #{user.name}")
             {data:{comments:comments, like_count:likes.count},message:{type:'success',value:'Added new comment successfully', code:TimeChatNet::Application::SUCCESS_QUERY}}
           else
             {data:[],message:{type:'error',value:'Can not find media', code:TimeChatNet::Application::MEDIA_NOT_FOUND}}
