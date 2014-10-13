@@ -220,21 +220,21 @@ class User
     user.send_push(msg, count)
   end
   
+  def send_notification_like_your_media(liked_user, media)
+    user = self
+    status = media.media_type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_VIDEO
+    user.notifications.create(message:"#{liked_user.name} liked media", data:liked_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[7], status:status)
+  end
+
+  def send_notification_comment_your_media(liked_user, media)
+    user = self
+    status = media.media_type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_VIDEO
+    user.notifications.create(message:"#{liked_user.name} added new comment", data:liked_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[6], status:status)
+  end
+
   def send_notification_add_new_comment(comment_user)
     user = self
     user.notifications.create(message:"You have received an comment from #{comment_user.name}", data:comment_user.id.to_s, type:Notification::TYPE[6], status:TimeChatNet::Application::NOTIFICATION_NEW_COMMENT)
-  end
-
-  def send_notification_like_your_media(liked_user, type)
-    user = self    
-    status = type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_VIDEO
-    user.notifications.create(message:"Added new like", data:liked_user.id.to_s, type:Notification::TYPE[7], status:status)
-  end
-
-  def send_notification_comment_your_media(liked_user, type)
-    user = self    
-    status = type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_VIDEO
-    user.notifications.create(message:"Added new comment", data:liked_user.id.to_s, type:Notification::TYPE[7], status:status)
   end
 
   def send_added_new_user_notification(new_user)

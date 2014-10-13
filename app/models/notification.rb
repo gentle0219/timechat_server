@@ -22,12 +22,12 @@ class Notification
   def api_detail
     notif = self
     notif.update_attributes(is_read:true)
-    if self.type == Notification::TYPE[5]
+    if [Notification::TYPE[5], Notification::TYPE[6], Notification::TYPE[7]].include?(self.type)
       friend = User.where(id:data).first
       media = Medium.where(id:media_id).first
       info = {
               id:id.to_s,
-              date: created_at.strftime("%Y-%m-%d %H:%M:%S"),              
+              date: created_at.strftime("%Y-%m-%d %H:%M:%S"),
               friend_avatar:friend.avatar_url,
               debug: message,
               friend_time: friend.created_at.strftime("%Y-%m-%d %H:%M:%S"),

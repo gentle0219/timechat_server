@@ -6,7 +6,7 @@ module Endpoints
         {success: 'test notifications'}
       end      
 
-      # Accept Friend
+      # Get notifications
       # GET: /api/v1/notifications
       # parameters:
       #   token               String *required      
@@ -15,11 +15,28 @@ module Endpoints
         if user.present?
           notifications = user.notifications
           notif_info = notifications.map{|notif| notif.api_detail}
-          {data:notif_info, message:{type:'success',value:'notifications', code: 0}}
+          {data:notif_info, message:{type:'success',value:'notifications', code: 7}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
       end
+
+      # Get notification count
+      # GET: /api/v1/notification_count
+      # parameters:
+      #   token               String *required      
+      get :notification_count do
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          notifications = user.unread_notifications
+          {data:{count:notifications.count}, message:{type:'success',value:'notifications', code: 7}}
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
+        end
+      end
+
+
+
 
       # Delete notification
       # POST: /api/v1/notifications/delete
@@ -32,7 +49,7 @@ module Endpoints
         if user.present?
           notification  = Notification.find(notification_id)
           notification.destroy
-          {data:[], message:{type:'success',value:'deleted notification', code: 0}}
+          {data:[], message:{type:'success',value:'deleted notification', code: 7}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
@@ -49,7 +66,7 @@ module Endpoints
           notifications.each do |notif|
             notif.update_attributes(is_read:true)
           end
-          {data:[], message:{type:'success',value:'read notifications', code: 0}}
+          {data:[], message:{type:'success',value:'read notifications', code: 7}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
