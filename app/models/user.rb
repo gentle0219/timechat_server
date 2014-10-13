@@ -100,7 +100,7 @@ class User
   #   lm_ids << media.id.to_s
   #   user.update_attributes(like_media_ids:lm_ids.uniq.join(","))
   #   friend = like.user
-  #   friend.send_notification_like_your_photo(user, media.media_type) unless user == friend
+  #   friend.send_notification_like_your_media(user, media.media_type) unless user == friend
   # end
 
   # def like_medias
@@ -225,9 +225,15 @@ class User
     user.notifications.create(message:"You have received an comment from #{comment_user.name}", data:comment_user.id.to_s, type:Notification::TYPE[6], status:TimeChatNet::Application::NOTIFICATION_NEW_COMMENT)
   end
 
-  def send_notification_like_your_photo(liked_user, type)
+  def send_notification_like_your_media(liked_user, type)
     user = self    
-    status = type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_VIDEO
+    status = type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_LIKE_YOUR_VIDEO
+    user.notifications.create(message:"Added new like", data:liked_user.id.to_s, type:Notification::TYPE[7], status:status)
+  end
+
+  def send_notification_comment_your_media(liked_user, type)
+    user = self    
+    status = type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_VIDEO
     user.notifications.create(message:"Added new like", data:liked_user.id.to_s, type:Notification::TYPE[7], status:status)
   end
 

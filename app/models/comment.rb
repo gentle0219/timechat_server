@@ -27,7 +27,7 @@ class Comment
   def send_notification
     media_user = medium.user
     unless user == media_user
-      media_user.send_notification_like_your_photo(user, medium.media_type) 
+      media_user.send_notification_comment_your_media(user, medium.media_type) 
       media_user.send_push_notification("#{user.name} favorited your photo")
     end    
   end
