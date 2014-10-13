@@ -46,7 +46,7 @@ module Endpoints
         media_id  = params[:media_id]
         if user.present?
           media = Medium.find(media_id)          
-          info = {id:media.id.to_s, filename:media.media_url, thumb:media.thumb_url, type:media.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:(media.created_at+user.to_i.time_zone.hour).strftime("%Y-%m-%d %H:%M:%S")}
+          info = {id:media.id.to_s, filename:media.media_url, thumb:media.thumb_url, type:media.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:media.created_time(user.time_zone)}
           {data:info,message:{type:'success',value:'get all medias', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}
@@ -90,7 +90,7 @@ module Endpoints
           
           st_date = DateTime.new(friend_time.year,friend_time.month,friend_time.day) - timezone.hour
           medias  = friend.medias.where(:created_at.gte => st_date)
-          info    = medias.map{|m| {id:m.id.to_s, filename:m.media_url, thumb:m.thumb_url, type:m.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:m.(created_at+user.time_zone.to_i.hour).strftime("%Y-%m-%d %H:%M:%S")}}
+          info    = medias.map{|m| {id:m.id.to_s, filename:m.media_url, thumb:m.thumb_url, type:m.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:m.created_time(user.time_zone)}}
           {data:info,message:{type:'success',value:'get all medias', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}
