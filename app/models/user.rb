@@ -234,7 +234,7 @@ class User
   def send_notification_comment_your_media(liked_user, type)
     user = self    
     status = type == '1' ? TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_PHOTO : TimeChatNet::Application::NOTIFICATION_FRIEND_COMMENTED_YOUR_VIDEO
-    user.notifications.create(message:"Added new like", data:liked_user.id.to_s, type:Notification::TYPE[7], status:status)
+    user.notifications.create(message:"Added new comment", data:liked_user.id.to_s, type:Notification::TYPE[7], status:status)
   end
 
   def send_added_new_user_notification(new_user)

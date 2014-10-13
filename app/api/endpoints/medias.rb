@@ -231,7 +231,7 @@ module Endpoints
             if like.save
               {data:{count:likes.count},message:{type:'success',value:'added like', code:TimeChatNet::Application::SUCCESS_QUERY}}  
             else
-              {data:like.errors.full_messages.first,message:{type:'error',value:'add like error', code:TimeChatNet::Application::SUCCESS_QUERY}}  
+              {data:{count:likes.count},message:{type:'error',value:like.errors.full_messages.first, code:TimeChatNet::Application::SUCCESS_QUERY}}
             end
             
           else
