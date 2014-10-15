@@ -35,7 +35,7 @@ class HomeController < ApplicationController
           password = (0...8).map{(65+rand(26)).chr}.join
           user = User.new
           status = user.update_attributes(email:email,password:password,password_confirmation:password,social_type:social_type,social_id:user_id, name:user_name, time_zone:time_zone, remote_avatar_url:remote_avatar_url)
-          user.send_notification_to_all_users          
+          user.send_notification_to_all_users
         end      
 
       when User::SOCIAL_TYPES[2]    # if social type is twitter
