@@ -63,6 +63,7 @@ class User
   field :sound_enable,              :type => Boolean,   default: true
 
   field :theme_type,                :type => String,    default: "1"
+  field :push_sound,                :type => String,    default: "default"
 
   field :authentication_token,      :type => String  
   before_save :ensure_authentication_token
@@ -342,7 +343,7 @@ class User
     devices.each do |device|
       if Rails.env.production?
         if device.platform == Device::DEVICE_PLATFORM[0]    # in case platform is ios
-          APNS.send_notification(device.dev_id,alert:message, badge:count, sound: 'sms_alert_popcorn') if device.dev_id.present?
+          APNS.send_notification(device.dev_id,alert:message, badge:count, sound:self.push_sound) if device.dev_id.present?
         else
           destination = [device.dev_id]
           data = {:alert=>notification.message}
@@ -358,7 +359,7 @@ class User
     devices.each do |device|
       if Rails.env.production?
         if device.platform == Device::DEVICE_PLATFORM[0]    # in case platform is ios
-          APNS.send_notification(device.dev_id,alert:message, badge:device.badge_count+1, sound: 'sms_alert_popcorn') if device.dev_id.present?
+          APNS.send_notification(device.dev_id,alert:message, badge:device.badge_count+1, sound:self.push_sound) if device.dev_id.present?
         else
           destination = [device.dev_id]
           data = {:alert=>notification.message}

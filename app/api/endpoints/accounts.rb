@@ -187,7 +187,7 @@ module Endpoints
         user = User.find_by_auth_token(params[:token])
         if user.present?
           #if (Time.now - user.last_sign_in_at) / 1.minute < 25
-            user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar.url}            
+            user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar.url,push_sound:user.push_sound}            
             setting   = {push_enable:user.push_enable,sound_enable:user.sound_enable,auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend, theme_type:user.theme_type}
             {data:{user_info:user_info, setting:setting},message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}
             
@@ -288,6 +288,25 @@ module Endpoints
         end
       end
 
+      # Sound Setting
+      # POST: /api/v1/accounts/sound_setting
+      # parameters:
+      #   token                 String *required
+      #   push_sound            String
+  
+      post :sound_setting do
+        push_sound = params[:push_sound]
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          if user.update_attributes(push_sound:push_sound)
+            {data:[], message:{type:'success',value:'Push sound', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[], message:{type:'error',value:'Can not set push sound', code: TimeChatNet::Application::ERROR_QUERY}}  
+          end
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
     end # end accounts
   end
 end
