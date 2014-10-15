@@ -105,8 +105,8 @@ module Endpoints
       post :add_friend do
         email = params[:email]
         user  = User.find_by_auth_token(params[:token])
-        if user.present?
-          friend = User.where(email:email).first
+        if user.present?          
+          friend = User.where({:email=>/^.*#{email}.*$/i}).first
           if friend.present?
             if user.id == friend.id
               {data:[], message:{type:'error',value:"#{email} is your email", code: TimeChatNet::Application::USER_UNREGISTERED}}

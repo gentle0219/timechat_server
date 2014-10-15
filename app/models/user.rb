@@ -85,7 +85,7 @@ class User
   
 
 
-  validates_uniqueness_of :name
+  validates_uniqueness_of :name, :case_sensitive => false
   validates_presence_of :role
   
   def unread_notifications
