@@ -63,7 +63,7 @@ class User
   field :sound_enable,              :type => Boolean,   default: true
 
   field :theme_type,                :type => String,    default: "1"
-  field :push_sound,                :type => String,    default: "default"
+  field :push_sound,                :type => String,    default: "Bamboo"
 
   field :authentication_token,      :type => String  
   before_save :ensure_authentication_token

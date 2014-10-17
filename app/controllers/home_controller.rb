@@ -9,7 +9,7 @@ class HomeController < ApplicationController
 
 
   def sign_up
-    email               = params[:email].downcase
+    email               = params[:email].present? ? params[:email].downcase : ""
     password            = params[:password]
     user_id             = params[:user_id]
     user_name           = params[:username]
