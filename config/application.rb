@@ -80,6 +80,7 @@ module TimeChatNet
     NOTIFICATION_SETTINGS_ENABLE                = 413
     NOTIFICATION_SETTINGS_DISABLE               = 414
     NOTIFICATION_ADDED_NEW_USER                 = 415
+    NOTIFICATION_ACCESS_MEDIA_USER              = 416
 
     # role
     NOT_CONFIRM_USER = 501

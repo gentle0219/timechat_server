@@ -46,10 +46,10 @@ class Medium
       
       unless notif.count > 0
         if media.media_type == '1'
-          type = user.is_friend(f) ? TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_PHOTO : TimeChatNet::Application::NOTIFICATION_INVITE_IN_FRIEND
+          type = user.is_friend(f) ? TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_PHOTO : TimeChatNet::Application::NOTIFICATION_ACCESS_MEDIA_USER
           f.send_photo_shared_friend_notification(owner, media, type)
         else
-          type = user.is_friend(f) ? TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_VIDEO : TimeChatNet::Application::NOTIFICATION_INVITE_IN_FRIEND
+          type = user.is_friend(f) ? TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_VIDEO : TimeChatNet::Application::NOTIFICATION_ACCESS_MEDIA_USER
           f.send_video_shared_friend_notification(owner, media, type)
         end
       end      

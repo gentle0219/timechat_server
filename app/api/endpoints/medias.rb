@@ -5,8 +5,7 @@ module Endpoints
       # test medias api
       get :ping do
         {success: "Media Endpoints"}
-      end
-      
+      end      
       # Get all media
       # GET: /api/v1/medias
       # parameters:

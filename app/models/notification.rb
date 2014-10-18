@@ -10,7 +10,8 @@ class Notification
   field :media_id,          type: String
   field :type,              type: String
   field :status,            type: Integer, default: 0
-
+  field :media_user_id,     type: String
+  field :media_user_name,   type: String  
   field :is_read,           type: Boolean, default: false
 
 
@@ -39,6 +40,8 @@ class Notification
               friend_id: friend.id.to_s,
               user_time: user.time,
               media_id:media_id,
+              media_user_id:media_user_id,
+              media_user_name:media_user_name,
               media_created_time:media.created_time(user.time_zone),
             }
     else    
@@ -56,6 +59,8 @@ class Notification
               status_info: "Sent notification",
               type: status,
               friend_id: friend.id.to_s,
+              media_user_id:media_user_id,
+              media_user_name:media_user_name,
               user_time: user.created_at
             }
       else

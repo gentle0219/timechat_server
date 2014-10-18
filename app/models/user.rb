@@ -148,7 +148,7 @@ class User
   def send_invite_friend_notification(friend)
     self.notifications.create(message:"#{friend.name} wants to add you in his friends", data:friend.id.to_s, type:Notification::TYPE[0], status:TimeChatNet::Application::NOTIFICATION_INVITE_IN_FRIEND)
     count = self.unread_notifications.count
-    self.send_push("#{friend.name} wants to add you in his friends", count)
+    self.send_push("#{friend.name} wants to add you in his friends", count, friend)
   end
 
   def send_accept_friend_notification(accepted_user)
@@ -166,7 +166,7 @@ class User
       user.notifications.create(message:msg, data:accepted_user.id.to_s, type:Notification::TYPE[2], status:TimeChatNet::Application::NOTIFICATION_ACCEPT_FRIEND)
     end
     count = user.unread_notifications.count
-    user.send_push(msg, count)
+    user.send_push(msg, count, accepted_user)
   end
 
   def send_decline_friend_notification(declined_user)
@@ -183,7 +183,7 @@ class User
     msg = "#{declined_user.name} declined your invitiation to friends"
     user.notifications.create(message:msg, data:declined_user.id.to_s, type:Notification::TYPE[1], status:TimeChatNet::Application::NOTIFICATION_DECLINE_FRIEND)
     count = user.unread_notifications.count
-    user.send_push(msg, count)
+    user.send_push(msg, count, declined_user)
   end
 
   def send_ignore_friend_notification(ignored_user)
@@ -210,32 +210,32 @@ class User
     user.notifications.create(message:msg, data:removed_user.id.to_s, type:Notification::TYPE[4], status:TimeChatNet::Application::NOTIFICATION_REMOVED_FRIEND)
     
     count = user.unread_notifications.count
-    user.send_push(msg, count)
+    user.send_push(msg, count, removed_user)
   end
 
   def send_photo_shared_friend_notification(share_user, media, type)
     user  = self
-    if user == share_user
+    if user.is_friend(share_user)
       msg   = "#{share_user.name} shared photo"
     else
-      msg   = "#{share_user.name} shared #{media.user.name}'s photo"
+      msg   = "#{share_user.name} shared #{media.user.name}'s photo. \n Will you add #{media.user.name} in your friend's list?"
     end
-    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:type)
+    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, media_user_id:media.user.id.to_s, media_user_name:media.user.name, type:Notification::TYPE[5], status:type)
 
     count = user.unread_notifications.count
-    user.send_push(msg, count)
+    user.send_push(msg, count, share_user)
   end
 
   def send_video_shared_friend_notification(share_user, media, type)
     user = self
-    if user == share_user
+    if user.is_friend(share_user)
       msg   = "#{share_user.name} shared video"
     else
-      msg   = "#{share_user.name} shared #{media.user.name}'s video"
+      msg   = "#{share_user.name} shared #{media.user.name}'s video. \n Will you add #{media.user.name} in your friend's list?"
     end
-    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:type)
+    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, media_user_id:media.user.id.to_s, media_user_name:media.user.name, type:Notification::TYPE[5], status:type)
     count = user.unread_notifications.count
-    user.send_push(msg, count)
+    user.send_push(msg, count, share_user)
   end
   
   def send_notification_like_your_media(liked_user, media)
@@ -282,7 +282,7 @@ class User
     offset = server_time_zone_offset / 60 / 60
     Time.now + ((time_zone.to_i)-offset).hours
   end
-  def add_friend(friend)    
+  def add_friend(friend)
     user                      = self
     f_ids                     = friend_ids.split(",") << friend.id.to_s
     invited_f_ids             = invited_friend_ids.split(",") << friend.id.to_s
@@ -354,13 +354,13 @@ class User
     end
   end
 
-  def send_push(message, count)
+  def send_push(message, count, user)
     return false if self.devices.count < 0
     devices = self.devices
     devices.each do |device|
       if Rails.env.production?
         if device.platform == Device::DEVICE_PLATFORM[0]    # in case platform is ios
-          APNS.send_notification(device.dev_id,alert:message, badge:count, sound:self.push_sound) if device.dev_id.present?
+          APNS.send_notification(device.dev_id,alert:message, badge:count, sound:self.push_sound, other:{user_id:user.id.to_s, user_name:user.name}) if device.dev_id.present?
         else
           destination = [device.dev_id]
           data = {:alert=>notification.message}
@@ -370,13 +370,13 @@ class User
     end
   end
 
-  def send_push_notification message
+  def send_push_notification message, user
     return false if self.devices.count < 0
     devices = self.devices
     devices.each do |device|
       if Rails.env.production?
         if device.platform == Device::DEVICE_PLATFORM[0]    # in case platform is ios
-          APNS.send_notification(device.dev_id,alert:message, badge:device.badge_count+1, sound:self.push_sound) if device.dev_id.present?
+          APNS.send_notification(device.dev_id,alert:message, badge:device.badge_count+1, sound:self.push_sound, other:{user_id:user.id.to_s, user_name:user.name}) if device.dev_id.present?
         else
           destination = [device.dev_id]
           data = {:alert=>notification.message}

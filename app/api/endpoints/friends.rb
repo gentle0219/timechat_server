@@ -163,8 +163,7 @@ module Endpoints
       #   user_ids            String *required
       post :add_friends do
         user_ids  = params[:user_ids].split(",")
-        user      = User.find_by_auth_token(params[:token])
-        p params[:user_ids]
+        user      = User.find_by_auth_token(params[:token])        
         if user.present?
           friends = User.in(id:user_ids)
           if friends.count > 0
@@ -186,6 +185,47 @@ module Endpoints
         end
       end
 
+
+      # Add Friends
+      # POST: /api/v1/friends/add_friends_by_phone_book
+      # parameters:
+      #   token               String *required
+      #   emails              String *required
+      post :add_friends_by_phone_book do
+        emails    = params[:emails].split(",")
+        user      = User.find_by_auth_token(params[:token])
+        if user.present?
+          friends = []
+          emails.each do |email|
+            friend = User.where(email:email).first
+            if friend.present?
+              friends << friend
+            else              
+              UserMailer.contact_user_email(email, user).deliver
+              UserTempNotification.create(email:email,user:user)              
+            end            
+          end
+          
+          if friends.count > 0
+            friends.each do |friend|
+              if !user.is_friend(friend) and user.id != friend.id
+                user.add_friend(friend)
+              end
+            end
+            if emails.count > 1
+              {data:[], message:{type:'success',value:'Invited new friends', code: TimeChatNet::Application::SUCCESS_QUERY}}
+            else
+              {data:[], message:{type:'success',value:'Invited new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
+            end
+          else
+            {data:[], message:{type:'success',value:'Invited new friends', code: TimeChatNet::Application::SUCCESS_QUERY}}
+          end          
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::USER_UNREGISTERED}}
+        end
+      end
+
+
       # Accept Friend
       # POST: /api/v1/friends/accept_friend
       # parameters:
@@ -200,7 +240,7 @@ module Endpoints
           friend = User.where(id:friend_id).first
           user.accept_friend(friend)
           notification = Notification.where(id:notification_id).first
-          notification.read!
+          notification.read! if notification.present?
           {data:friend.friend_api_detail(user), message:{type:'success',value:'accept new friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
@@ -220,8 +260,8 @@ module Endpoints
         if user.present?
           friend = User.where(id:friend_id).first          
           user.decline_friend(friend)          
-          notification = Notification.where(id:notification_id).first
-          notification.read!
+          notification = Notification.where(id:notification_id).first          
+          notification.read! if notification.present?
           {data:friend.friend_api_detail(user), message:{type:'success',value:'decline friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}

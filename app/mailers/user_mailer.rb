@@ -17,6 +17,11 @@ class UserMailer < ActionMailer::Base
     mail(to: @user.email, subject: 'Forgot Password')
   end
 
+  def contact_user_email(email, friend)
+    @friend = friend
+    mail(to: email, subject: 'Timechat APP')
+  end
+
   def invite_friend(user, friend)
     @user = user
     @friend = friend

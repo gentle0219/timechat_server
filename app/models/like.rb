@@ -23,7 +23,7 @@ class Like
     media_user = media.user
     unless user == media_user
       media_user.send_notification_like_your_media(user, media) 
-      media_user.send_push_notification("#{user.name} favorited your media")
+      media_user.send_push_notification("#{user.name} favorited your media", user)
     end    
   end
 

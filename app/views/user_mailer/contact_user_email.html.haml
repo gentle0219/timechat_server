@@ -1,0 +1,34 @@
+!!!
+%html
+  %head
+    %meta{content: "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
+    .header
+      = image_tag root_url + ActionController::Base.helpers.asset_path("email_template_header.png"), style: "height:98px;"
+    .content
+      %h3
+        Dear
+        
+      %p
+        = "You are invited to Timechat by #{@friend.name.capitalize}."
+        %br/
+        Download TimeChat from your device!
+      %p
+        Thank you,
+        %br/
+        TimeChat Team!
+
+    .footer
+      = image_tag root_url + ActionController::Base.helpers.asset_path("email_template_mark.png"), style: "height:50px;"
+
+:css
+  p, h3{
+    color: black;
+  }
+  h3{
+    margin: 0px;
+  }
+    
+:javascript
+  var elem = document.getElementById("message_headers");
+  elem.remove();

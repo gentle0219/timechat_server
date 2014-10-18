@@ -28,7 +28,7 @@ class Comment
     media_user = medium.user
     unless user == media_user
       media_user.send_notification_comment_your_media(user, medium) 
-      media_user.send_push_notification("#{user.name} commented your media")
+      media_user.send_push_notification("#{user.name} commented your media", user)
     end    
   end
 end

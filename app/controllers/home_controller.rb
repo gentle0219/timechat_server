@@ -30,7 +30,7 @@ class HomeController < ApplicationController
       when User::SOCIAL_TYPES[1]    # if social type is facebook
         user = User.where(email:email).first
         if user.present?
-          status = user.update_attributes(social_id:user_id, name:user_name, time_zone:time_zone, remote_avatar_url:remote_avatar_url)
+          status = user.update_attributes(social_id:user_id, time_zone:time_zone, remote_avatar_url:remote_avatar_url)
         else
           password = (0...8).map{(65+rand(26)).chr}.join
           user = User.new
@@ -42,7 +42,7 @@ class HomeController < ApplicationController
         email = user_id + "@timechat.com"
         user = User.where(email:email).first
         if user.present?
-          status = user.update_attributes(social_id:user_id, name:user_name)          
+          status = user.update_attributes(social_id:user_id)
         else
           user = User.new
           password = (0...8).map{(65+rand(26)).chr}.join
@@ -53,23 +53,34 @@ class HomeController < ApplicationController
       when User::SOCIAL_TYPES[3]    # if social type is google        
         user = User.where(email:email).first
         if user.present?
-          status = user.update_attributes(social_id:user_id, name:user_name)          
+          status = user.update_attributes(social_id:user_id)          
         else
           user = User.new
           password = (0...8).map{(65+rand(26)).chr}.join
           status = user.update_attributes(email:email,password:password,password_confirmation:password,social_type:social_type,social_id:user_id, name:user_name)
           user.send_notification_to_all_users
-        end
-        
+        end        
       end
 
       if status == false
-        msg = user.errors.messages.first.join(' ')
-        msg = msg.gsub('name', 'username').gsub('taken', 'existed').gsub(' is ', ' has ')
+        msg = user.errors.full_messages.first
+        # msg = msg.gsub('name', 'username').gsub('taken', 'existed').gsub(' is ', ' has ')
+        msg = "This account has been already registered"
         render :json => {data:[],message:{type:'error',value:msg.capitalize, code: TimeChatNet::Application::ERROR_LOGIN}}
-      else        
+      else
+        devices = Device.where(dev_id:dev_id)
+        devices.destroy_all
         Device.create_by_device_id(dev_id, user)
         user = sign_in( :user, user )
+
+        if social_type == User::SOCIAL_TYPES[0]          
+          user_temp = UserTempNotification.where(email:email).first
+          if user_temp.present?
+            user_temp.user.add_friend(user)
+            user_temp.destroy
+          end
+        end
+
         user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar_url}
         setting   = {push_enable:user.push_enable,sound_enable:user.sound_enable,auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend, theme_type:user.theme_type, push_sound:user.push_sound}
         if social_type == User::SOCIAL_TYPES[0]
@@ -87,17 +98,20 @@ class HomeController < ApplicationController
     dev_id          = params[:dev_id]
     timezone        = params[:timezone]
 
-    user = User.where({:email=>/^.*#{email}.*$/i}).first
+    user = User.where({:email=>/^#{email}$/i}).first if email.include?("@")
     unless user.present?
-      user = User.where({:name=>/^.*#{name}.*$/i}).first
+      user = User.where({:name=>/^#{email}$/i}).first
     end
     resource = user
     # resource = User.find_for_database_authentication(:email => email)
     
     if resource.nil?
       render :json => {data:[],message:{type:'error',value:"#{email} doesn't exist. Please register", code: TimeChatNet::Application::ERROR_LOGIN}}
-    else      
-      if resource.valid_password?( password )
+    else
+      
+      if resource.valid_password?(password)
+        devices = Device.where(dev_id:dev_id)
+        devices.destroy_all
         Device.create_by_device_id(dev_id,resource)
         user = sign_in(:user, resource)
         resource.update_attributes(time_zone:timezone)
