@@ -15,7 +15,7 @@ module Endpoints
         user = User.find_by_auth_token(params[:token])
         if user.present?
           medias = user.medias
-          info    = medias.map{|m| {id:m.id.to_s, filename:m.media_url, thumb:m.thumb_url, type:m.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:m.created_at.strftime("%Y-%m-%d %H:%M:%S")}}
+          info    = medias.map{|m| {id:m.id.to_s, filename:m.media_url, thumb:m.thumb_url, type:m.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:media.created_time(user.time_zone)}}
           {data:info,message:{type:'success',value:'get all medias', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
           {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}
@@ -89,7 +89,7 @@ module Endpoints
           friend.clear_media
           
           st_date = DateTime.new(friend_time.year,friend_time.month,friend_time.day) - timezone.hour
-          medias  = friend.medias.where(:created_at.gte => st_date)
+          medias  = friend.medias.where(:created_at.gte => st_date).order("created_at ASC")
           info    = medias.map{|m| {id:m.id.to_s, filename:m.media_url, thumb:m.thumb_url, type:m.media_type, user_time:user.time.strftime("%Y-%m-%d %H:%M:%S"), user_id:user.id.to_s,created_at:m.created_time(user.time_zone)}}
           {data:info,message:{type:'success',value:'get all medias', code:TimeChatNet::Application::SUCCESS_QUERY}}
         else
@@ -179,13 +179,9 @@ module Endpoints
         user          = User.find_by_auth_token(params[:token])        
         if user.present?
           friends     = User.in(id:params[:friend_ids].split(","))
-          p friends.count
-
-          media       = Medium.find(params[:media_id])
-          p media.id.to_s
-          
+          media       = Medium.find(params[:media_id])         
           if media.present?
-            media.share_friends(friends)
+            media.share_friends(user,friends)
             {data:{id:media.id.to_s,media:media.media_url},message:{type:'success',value:'Shared Media', code:TimeChatNet::Application::SUCCESS_UPLOADED}}
           else
             {data:[],message:{type:'error',value:'Can not find media', code:TimeChatNet::Application::MEDIA_NOT_FOUND}}  
@@ -266,7 +262,7 @@ module Endpoints
               media = user.medias.build(file:media, media_type:media_type, video_thumb:video_thumb)
             end            
             if media.save
-              {data:{id:media.id.to_s,filename:media.media_url, like_count:0, comment_count:0, notification_count:user.unread_notifications.count}, message:{type:'success',value:'success uploaded', code:TimeChatNet::Application::SUCCESS_UPLOADED}}
+              {data:{id:media.id.to_s,filename:media.media_url, created_at:media.created_time(user.time_zone), like_count:0, comment_count:0, notification_count:user.unread_notifications.count}, message:{type:'success',value:'success uploaded', code:TimeChatNet::Application::SUCCESS_UPLOADED}}
             else
               {data:media.errors.full_messages.first,message:{type:'error',value:'Can not create this media', code:TimeChatNet::Application::ERROR_LOGIN}}
             end
@@ -275,7 +271,7 @@ module Endpoints
             likes = media.present? ? media.likes.count : 0
             comments = media.present? ? media.comments.count : 0
             filename = media.media_type == '0' ? media.thumb_url : media.media_url
-            {data:{id:media.id.to_s,filename:filename, like_count:likes, comment_count:comments, notification_count:user.unread_notifications.count}, message:{type:'success',value:'success query', code:TimeChatNet::Application::SUCCESS_QUERY}}
+            {data:{id:media.id.to_s,filename:filename, created_at:media.created_time(user.time_zone), like_count:likes, comment_count:comments, notification_count:user.unread_notifications.count}, message:{type:'success',value:'success query', code:TimeChatNet::Application::SUCCESS_QUERY}}
           end          
         else
           {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}

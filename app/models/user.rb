@@ -91,8 +91,17 @@ class User
   def unread_notifications
     notifications.unread_notifications
   end
+  
   def friends
-    friends = User.in(id:friend_ids.split(","))    
+    friends = User.in(id:friend_ids.split(","))
+  end
+
+  def friends_list
+    friends = []
+    friend_ids.split(",").each do |friend_id|
+      friends << User.where(id:friend_id).first
+    end
+    friends
   end
 
   # def add_like_media(media)
@@ -204,19 +213,27 @@ class User
     user.send_push(msg, count)
   end
 
-  def send_photo_shared_friend_notification(share_user, media)
+  def send_photo_shared_friend_notification(share_user, media, type)
     user  = self
-    msg   = "#{share_user.name} shared new photo"
-    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_PHOTO)
+    if user == share_user
+      msg   = "#{share_user.name} shared photo"
+    else
+      msg   = "#{share_user.name} shared #{media.user.name}'s photo"
+    end
+    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:type)
 
     count = user.unread_notifications.count
     user.send_push(msg, count)
   end
 
-  def send_video_shared_friend_notification(share_user, media)
+  def send_video_shared_friend_notification(share_user, media, type)
     user = self
-    msg  = "#{share_user.name} shared new video"
-    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_VIDEO)
+    if user == share_user
+      msg   = "#{share_user.name} shared video"
+    else
+      msg   = "#{share_user.name} shared #{media.user.name}'s video"
+    end
+    user.notifications.create(message:msg, data:share_user.id.to_s, media_id:media.id.to_s, type:Notification::TYPE[5], status:type)
     count = user.unread_notifications.count
     user.send_push(msg, count)
   end

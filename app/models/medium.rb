@@ -36,18 +36,21 @@ class Medium
     friend.send_shared_friend_notification(user)
   end
 
-  def share_friends(friends)
+  def share_friends(owner, friends)
     media = self
     friends.each do |f|
       ids = shared_ids.split(",")
       ids << f.id.to_s
       media.update_attribute(:shared_ids,ids.uniq.join(","))
       notif = f.notifications.where(media_id:media.id.to_s)
+      
       unless notif.count > 0
         if media.media_type == '1'
-          f.send_photo_shared_friend_notification(user, media)
+          type = user.is_friend(f) ? TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_PHOTO : TimeChatNet::Application::NOTIFICATION_INVITE_IN_FRIEND
+          f.send_photo_shared_friend_notification(owner, media, type)
         else
-          f.send_video_shared_friend_notification(user, media)
+          type = user.is_friend(f) ? TimeChatNet::Application::NOTIFICATION_FRIEND_ADDED_NEW_VIDEO : TimeChatNet::Application::NOTIFICATION_INVITE_IN_FRIEND
+          f.send_video_shared_friend_notification(owner, media, type)
         end
       end      
     end    

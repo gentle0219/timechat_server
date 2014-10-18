@@ -23,7 +23,7 @@ module Endpoints
             friend_info = {id:friend.id.to_s, email:friend.email, avatar:friend.avatar_url, friend_status:user.is_block(friend), time_zone:friend.time_zone, username:friend.name}
             {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
           else
-            friends = user.friends.reject{|f| !user.is_friend(f)}
+            friends = user.friends_list.reject{|f| !user.is_friend(f)}
             friend_info = friends.map{|f| {id:f.id.to_s, email:f.email, avatar:f.avatar_url, debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name}}
             {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
           end

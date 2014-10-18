@@ -13,7 +13,7 @@ module Endpoints
       get do
         user = User.find_by_auth_token(params[:token])
         if user.present?
-          notifications = user.notifications
+          notifications = user.notifications.order("created_at DESC")
           notif_info = notifications.map{|notif| notif.api_detail}
           {data:notif_info, message:{type:'success',value:'notifications', code: 7}}
         else
