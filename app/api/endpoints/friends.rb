@@ -106,7 +106,7 @@ module Endpoints
         email = params[:email]
         user  = User.find_by_auth_token(params[:token])
         if user.present?          
-          friend = User.where({:email=>/^.*#{email}.*$/i}).first
+          friend = User.where(email:email).first
           if friend.present?
             if user.id == friend.id
               {data:[], message:{type:'error',value:"#{email} is your email", code: TimeChatNet::Application::USER_UNREGISTERED}}
@@ -119,7 +119,8 @@ module Endpoints
               {data:friend.friend_api_detail(user), message:{type:'success',value:'Added new friend', code: TimeChatNet::Application::SUCCESS_QUERY}}
             end
           else
-            {data:[], message:{type:'error',value:"#{email} dosen't exist", code: TimeChatNet::Application::USER_UNREGISTERED}}
+            UserMailer.contact_user_email(email, user).deliver
+            {data:[], message:{type:'error',value:"Sent invite email to #{email}", code: TimeChatNet::Application::USER_UNREGISTERED}}
           end
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::USER_UNREGISTERED}}
@@ -132,11 +133,13 @@ module Endpoints
       #   token               String *required
       #   username            String *required
       post :add_friend_by_username do
-        username  = params[:username]
+        username  = params[:username].strip
         user      = User.find_by_auth_token(params[:token])
         if user.present?
-          friend = User.where({:name=>/^.*#{username}.*$/i}).first
-
+          friend = User.where({:name=>/^#{username}$/i}).first
+          p ">>>>>>#{username}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+          p friend.id.to_s
+          p ">>>>>>#{username}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
           if friend.present?
             if user.id == friend.id
               {data:[], message:{type:'error',value:"#{username} is your username", code: TimeChatNet::Application::USER_UNREGISTERED}}

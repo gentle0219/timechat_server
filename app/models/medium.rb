@@ -105,4 +105,9 @@ class Medium
     ed_time = hour+1 < 0 ? DateTime.now.change(hour:hour+1) - 1.day : DateTime.now.change(hour:(hour+1))
     where({:created_at.gte => st_time, :created_at.lt => ed_time})    
   end  
+
+  def self.clear(days=3)
+    medias = self.where({created_at.lte => Time.now - days.days})
+    medias.destroy_all
+  end
 end

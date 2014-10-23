@@ -42,7 +42,7 @@ class Notification
               media_id:media_id,
               media_user_id:media_user_id,
               media_user_name:media_user_name,
-              media_created_time:media.created_time(user.time_zone),
+              media_created_time:media.present? ? media.created_time(user.time_zone) : "",
             }
     else    
       friend = User.where(id:data).first

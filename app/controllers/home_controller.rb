@@ -93,14 +93,14 @@ class HomeController < ApplicationController
   end
   
   def create_session
-    email           = params[:email].delete(" ").downcase
+    email           = params[:email].strip
     password        = params[:password]
     dev_id          = params[:dev_id]
     timezone        = params[:timezone]
 
-    user = User.where({:email=>/^#{email}$/i}).first if email.include?("@")
+    user = User.where({:email=>/^#{email.downcase}$/i}).first if email.include?("@")
     unless user.present?
-      user = User.where({:name=>/^#{email}$/i}).first
+      user = User.where({:name=>/^#{email.downcase}$/i}).first
     end
     resource = user
     # resource = User.find_for_database_authentication(:email => email)
