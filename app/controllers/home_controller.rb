@@ -35,7 +35,7 @@ class HomeController < ApplicationController
           password = (0...8).map{(65+rand(26)).chr}.join
           user = User.new
           status = user.update_attributes(email:email,password:password,password_confirmation:password,social_type:social_type,social_id:user_id, name:user_name, time_zone:time_zone, remote_avatar_url:remote_avatar_url)
-          user.send_notification_to_all_users
+          # user.send_notification_to_all_users
         end      
 
       when User::SOCIAL_TYPES[2]    # if social type is twitter
@@ -47,7 +47,7 @@ class HomeController < ApplicationController
           user = User.new
           password = (0...8).map{(65+rand(26)).chr}.join
           status = user.update_attributes(email:email,password:password,password_confirmation:password,social_type:social_type,social_id:user_id, name:user_name)
-          user.send_notification_to_all_users
+          # user.send_notification_to_all_users
         end
 
       when User::SOCIAL_TYPES[3]    # if social type is google        
@@ -58,7 +58,7 @@ class HomeController < ApplicationController
           user = User.new
           password = (0...8).map{(65+rand(26)).chr}.join
           status = user.update_attributes(email:email,password:password,password_confirmation:password,social_type:social_type,social_id:user_id, name:user_name)
-          user.send_notification_to_all_users
+          # user.send_notification_to_all_users
         end        
       end
 
@@ -84,7 +84,7 @@ class HomeController < ApplicationController
         user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar_url}
         setting   = {push_enable:user.push_enable,sound_enable:user.sound_enable,auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend, theme_type:user.theme_type, push_sound:user.push_sound}
         if social_type == User::SOCIAL_TYPES[0]
-          user.send_notification_to_all_users
+          # user.send_notification_to_all_users
           UserMailer.welcome(user).deliver
         end
         render :json => {data:{user_info:user_info,setting:setting},message:{type:'success',value:'Signed up successfully', code: TimeChatNet::Application::SUCCESS_LOGIN}}
