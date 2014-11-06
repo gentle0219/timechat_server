@@ -1,21 +1,33 @@
 class Comment
   include Mongoid::Document
   include Mongoid::Timestamps
+  mount_uploader :audio_comment, MediaUploader
 
-  field :comment, type: String
+  field :comment,       type: String
   
+  field :audio_comment, type: String
+
   belongs_to :medium
   belongs_to :user
   
   after_create :send_notification
 
+  def message
+    if comment.present?
+      comment
+    else
+      audio_comment.url
+    end
+  end
+
   def api_detail
     {
       id:id.to_s,
+      comment_type: comment.present? ? 1 : 0
       avatar:user.avatar_url,
       created_time:created_at.strftime("%Y-%m-%d %H:%M:%S"),
       media_id:medium.id.to_s,
-      message:comment,
+      message:message,
       role:TimeChatNet::Application::CONFIRM_USER,
       time_zone:user.time_zone,
       user_id:user.id.to_s,

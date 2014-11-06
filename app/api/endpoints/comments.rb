@@ -60,6 +60,33 @@ module Endpoints
         end
       end
 
+      # Add audio comment
+      # POST: /api/v1/comments/add_audio_comment
+      # parameters:
+      #   token             String *required
+      #   media_id          String *required
+      #   audio_comment     File *required
+      post :add_audio_comment do
+        media_id        = params[:media_id]
+        audio_comment   = params[:audio_comment]
+        user            = User.find_by_auth_token(params[:token])
+        if user.present?
+          media = Medium.find(media_id)
+          if media.present?
+            owner     = media.user
+            comment   = media.comments.create(audio_comment:audio_comment, user:user)            
+            comments  = media.comments.map{|cm| cm.api_detail}
+            likes     = media.likes
+
+            # owner.send_push_notification("You have received an comment from #{user.name}")
+            {data:{comments:comments, like_count:likes.count},message:{type:'success',value:'Added new comment successfully', code:TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[],message:{type:'error',value:'Can not find media', code:TimeChatNet::Application::MEDIA_NOT_FOUND}}
+          end
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
       
 
     end #// resouce
