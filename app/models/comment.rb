@@ -23,7 +23,7 @@ class Comment
   def api_detail
     {
       id:id.to_s,
-      comment_type: comment.present? ? 1 : 0
+      comment_type: comment.present? ? 1 : 0,
       avatar:user.avatar_url,
       created_time:created_at.strftime("%Y-%m-%d %H:%M:%S"),
       media_id:medium.id.to_s,
