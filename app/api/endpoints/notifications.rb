@@ -35,9 +35,6 @@ module Endpoints
         end
       end
 
-
-
-
       # Delete notification
       # POST: /api/v1/notifications/delete
       # parameters:
@@ -71,6 +68,22 @@ module Endpoints
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
       end
+
+      # Remove all notification
+      # POST: /api/v1/notifications/remove_all
+      # parameters:
+      #   token               String *required      
+      post :remove_all do
+        user    = User.find_by_auth_token(params[:token])        
+        if user.present?
+          notifications = user.notifications.destroy_all
+          {data:[], message:{type:'success',value:'read notifications', code: 7}}
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
+        end
+      end
+
+
 
     end #notifications
   end
