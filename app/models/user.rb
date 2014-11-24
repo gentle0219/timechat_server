@@ -4,6 +4,7 @@ class User
   
   ROLES = ['user', 'admin']
   SOCIAL_TYPES = %w[email facebook twitter google]
+  ONLINE_LIMIT = 1.hours
   mount_uploader :avatar, AvatarUploader
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
@@ -66,6 +67,11 @@ class User
   field :push_sound,                :type => String,    default: "Bamboo"
 
   field :authentication_token,      :type => String  
+  
+  field :user_status,               :type => Integer,   default: 0
+
+
+
   before_save :ensure_authentication_token
   
 
@@ -133,6 +139,11 @@ class User
     self.role == User::ROLES[0]
   end
  
+  def is_online?
+    # Time.now - last_sign_in_at < ONLINE_LIMIT
+    user_status
+  end
+
   def self.search(search)
     if search.present?
       self.or({ :email => /.*#{search}*./ }, { :name => /.*#{search}*./ })
@@ -387,7 +398,11 @@ class User
   end
 
   def self.find_by_auth_token token
-    User.where(authentication_token: token).first
+    user = User.where(authentication_token: token).first
+    # if user.present?
+    #   user.update_attributes(last_sign_in_at:Time.now)
+    # end
+    # user
   end
 
   def send_notification_to_all_users

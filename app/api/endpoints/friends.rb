@@ -20,7 +20,21 @@ module Endpoints
         if user.present?
           friend = User.where(id:friend_id).first
           if friend.present?
-            friend_info = {id:friend.id.to_s, email:friend.email, avatar:friend.avatar_url, friend_status:user.is_block(friend), time_zone:friend.time_zone, username:friend.name}
+            avatar_status = AvatarStatus.where(user:friend)
+
+            # Avatar status changed if avatar status count is larger than 0
+            if avatar_status.count > 0
+              avt_status = avatar_status.where(friend:user).first
+              if avt_status.present?
+                avt_status = avt_status.status 
+              else
+                avt_status = 1        # Avatar status changed
+              end
+            # Avatar status not changed if avatar status count is less than 0
+            else
+              avt_status = 0          # Avatar not changed
+            end
+            friend_info = {id:friend.id.to_s, email:friend.email, avatar:friend.avatar_url, avatar_status:avt_status, friend_status:user.is_block(friend), time_zone:friend.time_zone, username:friend.name, is_online:friend.is_online?}
             {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
           else
             friends = user.friends_list.reject{|f| !user.is_friend(f)}

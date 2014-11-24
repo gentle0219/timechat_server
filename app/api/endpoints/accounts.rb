@@ -50,8 +50,7 @@ module Endpoints
         avatar       = params[:avatar]
 
         is_changed   = true        
-        user = User.find_by_auth_token(params[:token])
-        
+        user = User.find_by_auth_token(params[:token])        
         if user.present?          
           if new_password.present?
             if user.valid_password?(old_password)
@@ -80,6 +79,9 @@ module Endpoints
           if avatar.present?
             unless user.update_attribute(:avatar,avatar)
               is_changed = false
+            else
+              avatar_status = AvatarStatus.new(user:user, status:1)
+              avatar_status.save
             end
           end
 
@@ -187,6 +189,7 @@ module Endpoints
         user = User.find_by_auth_token(params[:token])
         if user.present?
           #if (Time.now - user.last_sign_in_at) / 1.minute < 25
+            user.update_attributes(last_sign_in_at:Time.now, user_status: 1)
             user_info = {id:user.id.to_s, username:user.name,email:user.email,token:user.authentication_token,avatar:user.avatar.url}            
             setting   = {push_enable:user.push_enable,sound_enable:user.sound_enable,auto_accept_friend:user.auto_accept_friend,auto_notify_friend:user.auto_notify_friend, theme_type:user.theme_type,push_sound:user.push_sound}
             {data:{user_info:user_info, setting:setting},message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}
@@ -307,6 +310,64 @@ module Endpoints
           {data:[], message:{type:'error',value:'Can not find this user', code: TimeChatNet::Application::ERROR_LOGIN}}
         end
       end
+
+      # Rread avatar
+      # POST: /api/v1/accounts/read_avatar
+      # parameters:
+      #   token                 String *required
+      #   friend_id             String      
+      post :read_avatar do
+        user = User.find_by_auth_token(params[:token])
+        friend = User.find(params[:friend_id])
+        if user.present?
+          avatar_status = AvatarStatus.where(user:friend, friend:user).first
+          if avatar_status.present?
+            avatar_status.update_attributes(status:0)
+            {data:[], message:{type:'success',value:"Changed friend's avatar status", code: TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[], message:{type:'error',value:"Can not change friend's avatar status", code: TimeChatNet::Application::ERROR_QUERY}}  
+          end            
+        else
+          {data:[], message:{type:'error',value:"Can not find this user", code: TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
+
+      # Change user status to online
+      # POST: /api/v1/accounts/set_online
+      # parameters:
+      #   token                 String *required      
+      post :set_online do
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          if user.update_attributes(:user_status, 1)
+            {data:[], message:{type:'success',value:"Changed user status to online", code: TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[], message:{type:'error',value:"Can not change user status", code: TimeChatNet::Application::ERROR_QUERY}}  
+          end            
+        else
+          {data:[], message:{type:'error',value:"Can not find this user", code: TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
+
+      # Change user status to offline
+      # POST: /api/v1/accounts/set_offline
+      # parameters:
+      #   token                 String *required      
+      post :set_offline do
+        user = User.find_by_auth_token(params[:token])
+        if user.present?
+          if user.update_attributes(:user_status, 0)
+            {data:[], message:{type:'success',value:"Changed user status to offline", code: TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[], message:{type:'error',value:"Can not change user status", code: TimeChatNet::Application::ERROR_QUERY}}  
+          end
+        else
+          {data:[], message:{type:'error',value:"Can not find this user", code: TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
+
+
+
     end # end accounts
   end
 end

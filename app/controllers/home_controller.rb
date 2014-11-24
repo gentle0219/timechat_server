@@ -114,7 +114,7 @@ class HomeController < ApplicationController
         devices.destroy_all
         Device.create_by_device_id(dev_id,resource)
         user = sign_in(:user, resource)
-        resource.update_attributes(time_zone:timezone)
+        resource.update_attributes(time_zone:timezone, last_sign_in_at:Time.now, user_status: 1)
         user_info = { id:resource.id.to_s, username:resource.name,email:resource.email,token:resource.authentication_token,avatar:resource.avatar_url}
         setting   = { push_enable:resource.push_enable,sound_enable:resource.sound_enable,auto_accept_friend:resource.auto_accept_friend,auto_notify_friend:resource.auto_notify_friend, theme_type:resource.theme_type,push_sound:resource.push_sound}
         render :json => {data:{user_info:user_info, setting:setting},message:{type:'success',value:'login success', code: TimeChatNet::Application::SUCCESS_LOGIN}}

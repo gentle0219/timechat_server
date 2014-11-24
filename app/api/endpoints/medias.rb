@@ -277,6 +277,25 @@ module Endpoints
         end
       end
 
+      # Destroy media
+      # POST: /api/v1/medias/destroy_media
+      # parameters:
+      #   token               String *required
+      #   media_id            String *required     
+      post :destroy_media do
+        user        = User.find_by_auth_token(params[:token])        
+        media_id    = params[:media_id]
+        if user.present?
+          media = user.medias.find(media_id)
+          if media.destroy
+            {data:[], message:{type:'success',value:"Destroyed media", code: TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[], message:{type:'error',value:"Can not destroy this media", code: TimeChatNet::Application::ERROR_QUERY}}
+          end
+        else
+          {data:[],message:{type:'error',value:'Can not find this user', code:TimeChatNet::Application::ERROR_LOGIN}}
+        end
+      end
 
     end #end medias
   end

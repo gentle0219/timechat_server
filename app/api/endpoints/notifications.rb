@@ -77,7 +77,7 @@ module Endpoints
         user    = User.find_by_auth_token(params[:token])        
         if user.present?
           notifications = user.notifications.destroy_all
-          {data:[], message:{type:'success',value:'read notifications', code: 7}}
+          {data:[], message:{type:'success',value:'removed all notifications successfully', code: 7}}
         else
           {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
         end
