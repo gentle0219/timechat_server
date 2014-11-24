@@ -417,6 +417,24 @@ class User
     medias.destroy_all
   end
 
+
+  def friend_avatar_status(friend)
+    avatar_status = AvatarStatus.where(user:friend)
+    # Avatar status changed if avatar status count is larger than 0
+    if avatar_status.count > 0
+      avt_status = avatar_status.where(friend:self).first
+      if avt_status.present?
+        avt_status = avt_status.status 
+      else
+        avt_status = 1        # Avatar status changed
+      end
+    # Avatar status not changed if avatar status count is less than 0
+    else
+      avt_status = 0          # Avatar not changed
+    end
+    avt_status
+  end
+  
   private
   def generate_authentication_token
     loop do 
