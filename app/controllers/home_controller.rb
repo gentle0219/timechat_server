@@ -132,7 +132,8 @@ class HomeController < ApplicationController
     if resource.nil?
       render :json => {data:[],message:{type:'error',value:'No Such User', code: TimeChatNet::Application::ERROR_LOGIN}}
     else
-      sign_out(resource)      
+      resource.update_attributes(user_status: 1)
+      sign_out(resource)
       render :json => {data:[],message:{type:'success',value:'Success sign out', code: TimeChatNet::Application::SUCCESS_LOGOUT}}
     end
   end
