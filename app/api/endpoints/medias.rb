@@ -286,7 +286,7 @@ module Endpoints
         user        = User.find_by_auth_token(params[:token])        
         media_id    = params[:media_id]
         if user.present?
-          media = user.medias.find(media_id)
+          media = Medium.find(media_id)
           if media.destroy
             {data:[], message:{type:'success',value:"Destroyed media", code: TimeChatNet::Application::SUCCESS_QUERY}}
           else
