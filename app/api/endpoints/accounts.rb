@@ -322,7 +322,7 @@ module Endpoints
         if user.present?
           avatar_status = AvatarStatus.where(user:friend, friend:user).first
           if avatar_status.present?
-            avatar_status.update_attributes(status:0)
+            avatar_status.update_attributes(status: 0)
             {data:[], message:{type:'success',value:"Changed friend's avatar status", code: TimeChatNet::Application::SUCCESS_QUERY}}
           else
             {data:[], message:{type:'error',value:"Can not change friend's avatar status", code: TimeChatNet::Application::ERROR_QUERY}}  
@@ -339,7 +339,7 @@ module Endpoints
       post :set_online do
         user = User.find_by_auth_token(params[:token])
         if user.present?
-          if user.update_attributes(:user_status, 1)
+          if user.update_attributes(user_status: 1)
             {data:[], message:{type:'success',value:"Changed user status to online", code: TimeChatNet::Application::SUCCESS_QUERY}}
           else
             {data:[], message:{type:'error',value:"Can not change user status", code: TimeChatNet::Application::ERROR_QUERY}}  
@@ -356,7 +356,7 @@ module Endpoints
       post :set_offline do
         user = User.find_by_auth_token(params[:token])
         if user.present?
-          if user.update_attributes(:user_status, 0)
+          if user.update_attributes(user_status: 0)
             {data:[], message:{type:'success',value:"Changed user status to offline", code: TimeChatNet::Application::SUCCESS_QUERY}}
           else
             {data:[], message:{type:'error',value:"Can not change user status", code: TimeChatNet::Application::ERROR_QUERY}}  
