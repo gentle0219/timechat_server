@@ -21,11 +21,11 @@ module Endpoints
           friend = User.where(id:friend_id).first
           if friend.present?
             avt_status = user.friend_avatar_status(friend)
-            friend_info = {id:friend.id.to_s, email:friend.email, avatar:friend.avatar_url, avatar_status:avt_status, friend_status:user.is_block(friend), time_zone:friend.time_zone, username:friend.name, is_online:friend.is_online?}
+            friend_info = {id:friend.id.to_s, email:friend.email, avatar:friend.avatar_url, avatar_status:avt_status, friend_status:user.is_block(friend), time_zone:friend.time_zone, username:friend.name, is_online:friend.is_online?, is_favorite:user.is_favorite?(friend)}
             {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
           else
             friends = user.friends_list.reject{|f| !user.is_friend(f)}
-            friend_info = friends.map{|f| {id:f.id.to_s, email:f.email, avatar:f.avatar_url, avatar_status:user.friend_avatar_status(f), debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name, is_online:f.is_online?}}
+            friend_info = friends.map{|f| {id:f.id.to_s, email:f.email, avatar:f.avatar_url, avatar_status:user.friend_avatar_status(f), debug:'Friend List', friend_status:user.is_block(f), time_zone:f.time_zone, username:f.name, is_online:f.is_online?, is_favorite:user.is_favorite?(f)}}
             {data:friend_info, message:{type:'success',value:'Success query', code: TimeChatNet::Application::SUCCESS_QUERY}}
           end
         else
@@ -324,6 +324,47 @@ module Endpoints
         end
       end
 
+      # Favorite Friend
+      # POST: /api/v1/friends/favorite_friend
+      # parameters:
+      #   token               String *required
+      #   friend_id           String *required
+      post :favorite_friend do
+        user            = User.find_by_auth_token(params[:token])
+        friend_id       = params[:friend_id]        
+        if user.present?
+          friend    = User.find(friend_id)
+          favorite  = user.favorites.build( friend: friend, status: 1 )
+          if favorite.save
+            {data:[], message:{type:'success',value:'Added favorite friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
+          else
+            {data:[], message:{type:'error',value:favorite.errors.full_messages.first, code: 0}}  
+          end
+          
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
+        end
+      end
+
+      # Favorite Friend
+      # POST: /api/v1/friends/remove_favorite_friend
+      # parameters:
+      #   token               String *required
+      #   friend_id           String *required
+      post :remove_favorite_friend do
+        user            = User.find_by_auth_token(params[:token])
+        friend_id       = params[:friend_id]        
+        if user.present?
+          friend    = User.find(friend_id)
+          favorite  = user.favorites.where(friend: friend).first
+          if favorite.present?
+            favorite.destroy
+          end          
+          {data:[], message:{type:'success',value:'Removed favorite friend', code:TimeChatNet::Application::SUCCESS_QUERY}}
+        else
+          {data:[], message:{type:'error',value:'Can not find this user', code: 0}}
+        end
+      end
 
     end
   end

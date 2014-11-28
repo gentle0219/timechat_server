@@ -89,6 +89,7 @@ class User
   has_many :comments,               dependent: :destroy
   has_many :likes
   
+  has_many :favorites,              dependent: :destroy
 
 
   validates_uniqueness_of :name, :case_sensitive => false
@@ -417,6 +418,14 @@ class User
     medias.destroy_all
   end
 
+  def is_favorite?(friend)
+    favorite = favorites.where(freiend: friend).first
+    if favorite.present?
+      favorite.status
+    else
+      0
+    end
+  end
 
   def friend_avatar_status(friend)
     avatar_status = AvatarStatus.where(user:friend)
