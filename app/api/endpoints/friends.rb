@@ -331,7 +331,7 @@ module Endpoints
       #   friend_id           String *required
       post :favorite_friend do
         user            = User.find_by_auth_token(params[:token])
-        friend_id       = params[:friend_id]        
+        friend_id       = params[:friend_id]
         if user.present?
           friend    = User.find(friend_id)
           favorite  = user.favorites.build( friend: friend, status: 1 )

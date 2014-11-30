@@ -419,7 +419,7 @@ class User
   end
 
   def is_favorite?(friend)
-    favorite = favorites.where(freiend_id: friend.id).first
+    favorite = favorites.where(friend_id: friend.id).first
     if favorite.present?
       favorite.status
     else
