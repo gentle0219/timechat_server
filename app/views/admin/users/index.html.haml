@@ -15,20 +15,34 @@
     %table.table.table-striped.table-hover.table-bordered
       %thead
         %tr
+          %th ID
           %th Email            
           %th User Name            
           %th Role
           %th App Visits            
           %th Medias Count
+          %th Social Type
+          %th Social ID
+          %th Friend IDs
+          %th Invited Friend IDs
+          %th Ignored Friend IDs
+          %th Avatar
           %th Actions
       %tbody
         - @users.each do |u|
           %tr
+            %th= u._id
             %td= u.email
             %td= u.name
             %td= u.role
             %td= u.sign_in_count
             %td= u.medias.count
+            %td= u.social_type
+            %td= u.social_id
+            %td= u.friend_ids
+            %td= u.invited_friend_ids
+            %td= u.ignored_friend_ids
+            %td= u.avatar
             %td
               = link_to(edit_admin_user_path(u), class: 'btn btn-mini', :"data-no-turbolink"=>true) do
                 %i.icon-pencil
